@@ -14,7 +14,7 @@ router = APIRouter()
 async def create_quiz(course_id: int, payload: QuizRequest, user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> Quiz:
     get_owned_course(course_id, user, db)
     content = await generate_quiz_from_course(course_id, payload.question_type, payload.count, payload.language)
-    quiz = Quiz(course_id=course_id, title=f"{payload.question_type} x {payload.count}", content=content)
+    quiz = Quiz(course_id=course_id, title=f"{payload.question_type} 共 {payload.count} 题", content=content)
     db.add(quiz)
     db.commit()
     db.refresh(quiz)

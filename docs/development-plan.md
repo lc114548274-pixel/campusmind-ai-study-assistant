@@ -1,33 +1,33 @@
-# Development Plan
+# 开发计划
 
-## Phase 1: MVP
+## 第一阶段：MVP
 
-- Course creation
-- PDF upload and parsing
-- Chunking and ChromaDB indexing
-- Course-grounded Q&A
-- Source references
+- 创建课程
+- 上传并解析 PDF
+- 文本切分与 ChromaDB 索引
+- 基于课程资料的问答
+- 返回来源引用
 
-## Phase 2: Study Features
+## 第二阶段：学习功能增强
 
-- Summaries
-- Quiz generation
-- Multilingual term translation
-- Chat history
+- 自动总结课件
+- 生成复习题
+- 多语言术语解释
+- 保存聊天记录
 
-## Phase 3: Product Polish
+## 第三阶段：产品完善
 
-- Better document status jobs
-- Streaming model responses
-- Export summaries and quizzes
-- Screenshot assets for README
-- GitHub Actions CI
+- 文档处理状态改为后台任务
+- 支持流式模型输出
+- 导出总结和复习题
+- 为 README 补充截图
+- 增加 GitHub Actions CI
 
-## Phase 4: Advanced Features
+## 第四阶段：高级功能
 
-- PPTX and DOCX support
-- OCR for scanned PDFs
-- Flashcards and spaced repetition
-- Wrong-answer notebook
-- Knowledge graph visualization
-- Cloud deployment profile
+- 支持 PPTX 和 DOCX
+- 支持扫描版 PDF OCR
+- 增加记忆卡片和间隔复习
+- 增加错题本
+- 增加知识图谱可视化
+- 增加云端部署配置

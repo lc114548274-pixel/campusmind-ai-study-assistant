@@ -28,7 +28,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       setToken(result.access_token);
       router.push("/dashboard");
     } catch (exc) {
-      setError(exc instanceof Error ? exc.message : "Request failed");
+      setError(exc instanceof Error ? exc.message : "请求失败");
     } finally {
       setLoading(false);
     }
@@ -42,32 +42,32 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             <GraduationCap />
           </span>
           <div>
-            <h1 className="text-2xl font-semibold">{mode === "login" ? "Welcome back" : "Create account"}</h1>
-            <p className="text-sm text-slate-500">Build your course AI knowledge base.</p>
+            <h1 className="text-2xl font-semibold">{mode === "login" ? "欢迎回来" : "创建账号"}</h1>
+            <p className="text-sm text-slate-500">构建你的课程 AI 知识库。</p>
           </div>
         </div>
         {mode === "register" && (
           <label className="mb-4 block text-sm font-medium">
-            Username
+            用户名
             <input name="username" required minLength={2} className="mt-2 w-full rounded border border-slate-200 px-3 py-3 outline-none focus:border-mint" />
           </label>
         )}
         <label className="mb-4 block text-sm font-medium">
-          Email
+          邮箱
           <input name="email" type="email" required className="mt-2 w-full rounded border border-slate-200 px-3 py-3 outline-none focus:border-mint" />
         </label>
         <label className="mb-5 block text-sm font-medium">
-          Password
+          密码
           <input name="password" type="password" required minLength={8} className="mt-2 w-full rounded border border-slate-200 px-3 py-3 outline-none focus:border-mint" />
         </label>
         {error && <p className="mb-4 rounded bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
         <button disabled={loading} className="w-full rounded bg-ink px-4 py-3 font-semibold text-white hover:bg-mint disabled:opacity-60">
-          {loading ? "Working..." : mode === "login" ? "Log in" : "Register"}
+          {loading ? "处理中..." : mode === "login" ? "登录" : "注册"}
         </button>
         <p className="mt-5 text-center text-sm text-slate-500">
-          {mode === "login" ? "No account yet?" : "Already have an account?"}{" "}
+          {mode === "login" ? "还没有账号？" : "已经有账号？"}{" "}
           <Link className="font-semibold text-mint" href={mode === "login" ? "/register" : "/login"}>
-            {mode === "login" ? "Register" : "Log in"}
+            {mode === "login" ? "注册" : "登录"}
           </Link>
         </p>
       </form>

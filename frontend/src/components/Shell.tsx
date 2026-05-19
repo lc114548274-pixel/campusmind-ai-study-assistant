@@ -17,16 +17,16 @@ export function Shell({ children }: { children: React.ReactNode }) {
             </span>
             <div>
               <p className="text-lg font-semibold leading-tight">CampusMind</p>
-              <p className="text-xs text-slate-500">Course knowledge base</p>
+              <p className="text-xs text-slate-500">课程知识库</p>
             </div>
           </Link>
           <div className="flex items-center gap-2">
             <span className="hidden items-center gap-2 rounded border border-teal-200 bg-teal-50 px-3 py-2 text-sm text-teal-800 sm:flex">
-              <Sparkles size={16} /> RAG Study Assistant
+              <Sparkles size={16} /> RAG 学习助手
             </span>
             <button
               className="grid h-10 w-10 place-items-center rounded border border-slate-200 bg-white text-slate-600 hover:border-coral hover:text-coral"
-              title="Log out"
+              title="退出登录"
               onClick={() => {
                 clearToken();
                 router.push("/login");

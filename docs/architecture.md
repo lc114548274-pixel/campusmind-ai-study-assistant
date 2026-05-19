@@ -1,51 +1,51 @@
-# Architecture
+# 系统架构
 
-CampusMind is a full-stack RAG application for course-based study workflows.
+CampusMind 是一个面向课程资料学习场景的全栈 RAG 应用。
 
 ```mermaid
 flowchart TD
-  A[Next.js Frontend] -->|HTTP API| B[FastAPI Backend]
-  B --> C[(SQL Database)]
+  A[Next.js 前端] -->|HTTP API| B[FastAPI 后端]
+  B --> C[(SQL 数据库)]
   B --> D[(ChromaDB Server)]
-  B --> E[PDF File Store]
-  B --> F{AI Provider}
-  F --> G[Ollama Local Models]
-  F --> H[OpenAI-Compatible Online Models]
+  B --> E[PDF 文件存储]
+  B --> F{AI 模型提供方}
+  F --> G[Ollama 本地模型]
+  F --> H[OpenAI 兼容在线模型]
 ```
 
-## Upload Pipeline
+## 上传处理流程
 
 ```mermaid
 sequenceDiagram
-  participant U as User
-  participant F as Frontend
-  participant B as Backend
-  participant P as PDF Parser
+  participant U as 用户
+  participant F as 前端
+  participant B as 后端
+  participant P as PDF解析器
   participant V as ChromaDB
 
-  U->>F: Upload PDF
-  F->>B: POST multipart file
-  B->>B: Save file metadata
-  B->>P: Extract page text
-  P-->>B: Page text
-  B->>B: Clean and chunk text
-  B->>B: Generate embeddings
-  B->>V: Upsert vectors and metadata
-  B-->>F: Document ready
+  U->>F: 上传 PDF
+  F->>B: 发送 multipart 文件
+  B->>B: 保存文件和元数据
+  B->>P: 提取每页文本
+  P-->>B: 返回页面文本
+  B->>B: 清洗并切分文本
+  B->>B: 生成 embedding
+  B->>V: 写入向量和元数据
+  B-->>F: 返回文档处理完成
 ```
 
-## Question Answering Pipeline
+## 问答流程
 
-1. User asks a course-specific question.
-2. Backend embeds the question.
-3. ChromaDB retrieves the most relevant chunks.
-4. Backend builds a grounded prompt with retrieved context.
-5. The configured AI model generates the answer.
-6. The answer is saved to chat history with source metadata.
+1. 用户在课程页面提出问题。
+2. 后端为问题生成 embedding。
+3. ChromaDB 检索最相关的课件片段。
+4. 后端把检索结果组装为受约束的 RAG Prompt。
+5. 配置的 AI 模型生成回答。
+6. 回答和来源信息写入聊天记录。
 
-## AI Provider Modes
+## AI 模式
 
-- `AI_PROVIDER=ollama`: local-first generation through Ollama.
-- `AI_PROVIDER=openai`: online generation through an OpenAI-compatible `/chat/completions` endpoint.
+- `AI_PROVIDER=ollama`：使用 Ollama 本地模型生成回答。
+- `AI_PROVIDER=openai`：使用 OpenAI 兼容的 `/chat/completions` 在线接口生成回答。
 
-Embeddings are generated through Ollama. During development, `ALLOW_MOCK_AI=true` enables deterministic fallback embeddings when Ollama is unavailable.
+Embedding 默认由 Ollama 生成。开发阶段如果 Ollama 不可用，并且 `ALLOW_MOCK_AI=true`，系统会使用确定性备用 embedding，保证基础流程可以演示。

@@ -15,7 +15,7 @@ async def chat(course_id: int, payload: ChatRequest, user: User = Depends(get_cu
     get_owned_course(course_id, user, db)
     session = db.get(ChatSession, payload.session_id) if payload.session_id else None
     if session and (session.course_id != course_id or session.user_id != user.id):
-        raise HTTPException(status_code=404, detail="Chat session not found")
+        raise HTTPException(status_code=404, detail="聊天会话不存在")
     if not session:
         session = ChatSession(course_id=course_id, user_id=user.id, title=payload.question[:80])
         db.add(session)
@@ -38,5 +38,5 @@ def list_sessions(course_id: int, user: User = Depends(get_current_user), db: Se
 def get_session(session_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> ChatSession:
     session = db.get(ChatSession, session_id)
     if not session or session.user_id != user.id:
-        raise HTTPException(status_code=404, detail="Chat session not found")
+        raise HTTPException(status_code=404, detail="聊天会话不存在")
     return session

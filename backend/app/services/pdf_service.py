@@ -10,7 +10,7 @@ from app.services.text_splitter import TextChunk, split_pages
 
 async def save_upload(file: UploadFile, course_id: int) -> Path:
     if not file.filename or not file.filename.lower().endswith(".pdf"):
-        raise ValueError("Only PDF files are supported")
+        raise ValueError("当前仅支持 PDF 文件")
     course_dir = settings.upload_dir / str(course_id)
     course_dir.mkdir(parents=True, exist_ok=True)
     safe_name = file.filename.replace("/", "_").replace("\\", "_")

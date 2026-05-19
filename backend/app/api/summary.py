@@ -22,7 +22,7 @@ async def create_summary(
 ) -> Summary:
     document = db.get(Document, document_id)
     if not document:
-        raise HTTPException(status_code=404, detail="Document not found")
+        raise HTTPException(status_code=404, detail="文档不存在")
     get_owned_course(document.course_id, user, db)
     if document.summary and not payload.force:
         return document.summary
@@ -39,8 +39,8 @@ async def create_summary(
 def get_summary(document_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> Summary:
     document = db.get(Document, document_id)
     if not document:
-        raise HTTPException(status_code=404, detail="Document not found")
+        raise HTTPException(status_code=404, detail="文档不存在")
     get_owned_course(document.course_id, user, db)
     if not document.summary:
-        raise HTTPException(status_code=404, detail="Summary not found")
+        raise HTTPException(status_code=404, detail="总结不存在")
     return document.summary

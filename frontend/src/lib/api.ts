@@ -48,7 +48,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
   if (!response.ok) {
     const detail = await response.json().catch(() => ({ detail: response.statusText }));
-    throw new Error(detail.detail || "Request failed");
+    throw new Error(detail.detail || "请求失败");
   }
   return response.json();
 }

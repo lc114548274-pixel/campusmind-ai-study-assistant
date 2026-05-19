@@ -9,7 +9,7 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.app_name,
-    description="Local AI-powered study assistant for university course materials.",
+    description="面向大学生课程资料的 AI 学习助手。",
     version="1.0.0",
 )
 
@@ -21,15 +21,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
-app.include_router(courses.router, prefix="/api/courses", tags=["courses"])
-app.include_router(documents.router, prefix="/api", tags=["documents"])
-app.include_router(chat.router, prefix="/api", tags=["chat"])
-app.include_router(summary.router, prefix="/api", tags=["summary"])
-app.include_router(quiz.router, prefix="/api", tags=["quiz"])
-app.include_router(terms.router, prefix="/api", tags=["terms"])
+app.include_router(auth.router, prefix="/api/auth", tags=["认证"])
+app.include_router(courses.router, prefix="/api/courses", tags=["课程"])
+app.include_router(documents.router, prefix="/api", tags=["文档"])
+app.include_router(chat.router, prefix="/api", tags=["AI 问答"])
+app.include_router(summary.router, prefix="/api", tags=["总结"])
+app.include_router(quiz.router, prefix="/api", tags=["复习题"])
+app.include_router(terms.router, prefix="/api", tags=["术语"])
 
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "app": settings.app_name}
+    return {"status": "正常", "app": settings.app_name}

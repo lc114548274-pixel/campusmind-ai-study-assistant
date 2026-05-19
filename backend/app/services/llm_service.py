@@ -32,7 +32,7 @@ async def _generate_openai_compatible(prompt: str, system: str | None = None) ->
     if not settings.openai_api_key:
         if settings.allow_mock_ai:
             return _fallback_answer(prompt)
-        raise RuntimeError("OPENAI_API_KEY is required when AI_PROVIDER=openai")
+        raise RuntimeError("当 AI_PROVIDER=openai 时必须配置 OPENAI_API_KEY")
     messages = []
     if system:
         messages.append({"role": "system", "content": system})
@@ -49,7 +49,7 @@ async def _generate_openai_compatible(prompt: str, system: str | None = None) ->
 
 def _fallback_answer(prompt: str) -> str:
     return (
-        "AI model is not reachable yet. The backend pipeline is working, but no live model response was "
-        "returned. Start Ollama or configure an OpenAI-compatible provider in .env, then retry this action.\n\n"
-        "Prompt preview:\n" + prompt[:900]
+        "当前暂时无法连接 AI 模型。后端流程已经正常运行，但没有拿到真实模型回答。"
+        "请启动 Ollama，或在 .env 中配置 OpenAI 兼容在线模型后重试。\n\n"
+        "Prompt 预览：\n" + prompt[:900]
     )

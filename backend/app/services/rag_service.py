@@ -133,24 +133,24 @@ async def answer_question(course_id: int, question: str, language: str) -> tuple
         f"[{idx + 1}] {source.document_name}, page {source.page}\n{source.text}" for idx, source in enumerate(sources)
     )
     prompt = f"""
-You are CampusMind, an AI study assistant for university students.
-Answer the user's question based only on the provided course materials.
-If the answer cannot be found in the context, say the course material does not provide enough information.
+你是 CampusMind，一个面向大学生的 AI 课程学习助手。
+请只根据提供的课程资料回答用户问题。
+如果上下文中找不到答案，请明确说明“课程资料中没有提供足够信息”。
 
-Context:
-{context or "No retrieved context."}
+课程资料上下文：
+{context or "没有检索到相关课程资料。"}
 
-User question:
+用户问题：
 {question}
 
-Answer language:
+回答语言：
 {language}
 
-Requirements:
-1. Be accurate and concise.
-2. Explain difficult terms clearly.
-3. Do not invent facts outside the provided context.
-4. Include source references like [1], [2] when available.
+要求：
+1. 准确、清晰、简洁。
+2. 对难懂术语进行解释。
+3. 不要编造课程资料以外的事实。
+4. 如果有来源，请使用 [1]、[2] 这样的引用标记。
 """
     answer = await generate_text(prompt.strip())
     return answer, sources
@@ -158,20 +158,20 @@ Requirements:
 
 async def summarize_document_text(text: str, language: str) -> str:
     prompt = f"""
-You are an academic study assistant. Summarize this lecture material for exam preparation.
+你是一个面向考试复习的学术学习助手。请总结以下课件资料。
 
-Material:
+课件资料：
 {text}
 
-Generate:
-1. Chapter summary
-2. Key concepts
-3. Important formulas or definitions
-4. Possible exam points
-5. Short review checklist
-6. English/Korean/Chinese terminology table when useful
+请生成：
+1. 章节摘要
+2. 核心概念
+3. 重要公式或定义
+4. 可能考试重点
+5. 简短复习清单
+6. 如有必要，生成英文 / 韩文 / 中文术语对照表
 
-Language: {language}
+输出语言：{language}
 """
     return await generate_text(prompt.strip())
 
@@ -180,35 +180,35 @@ async def generate_quiz_from_course(course_id: int, question_type: str, count: i
     sources = await search_course(course_id, f"important exam concepts {question_type}", k=max(8, settings.retrieval_k))
     context = "\n\n".join(source.text or "" for source in sources)
     prompt = f"""
-Generate study questions based on the following course material.
+请根据以下课程资料生成复习题。
 
-Material:
+课程资料：
 {context}
 
-Question type: {question_type}
-Number of questions: {count}
-Language: {language}
+题型：{question_type}
+题目数量：{count}
+输出语言：{language}
 
-For each question, provide:
-1. Question
-2. Options if multiple choice
-3. Correct answer
-4. Explanation
-Keep the result well structured in Markdown.
+每道题请包含：
+1. 题目
+2. 如果是选择题，请提供选项
+3. 正确答案
+4. 解析
+请使用结构清晰的 Markdown 输出。
 """
     return await generate_text(prompt.strip())
 
 
 async def translate_terms(text: str, source_language: str, target_language: str) -> str:
     prompt = f"""
-Extract and explain academic or technical terms from this material.
-Source language: {source_language}
-Target language: {target_language}
+请从以下资料中提取并解释学术或技术术语。
+源语言：{source_language}
+目标语言：{target_language}
 
-Return a Markdown table with columns:
-Term, Korean, English, Chinese, Explanation, Example.
+请返回 Markdown 表格，列名为：
+术语、韩文、英文、中文、解释、例句。
 
-Material:
+资料：
 {text}
 """
     return await generate_text(prompt.strip())

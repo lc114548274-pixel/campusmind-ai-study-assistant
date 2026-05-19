@@ -25,7 +25,7 @@ async def upload_document(
         path = await save_upload(file, course_id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    document = Document(course_id=course_id, file_name=file.filename or "lecture.pdf", file_path=str(path), status="processing")
+    document = Document(course_id=course_id, file_name=file.filename or "课件.pdf", file_path=str(path), status="processing")
     db.add(document)
     db.commit()
     db.refresh(document)
@@ -53,7 +53,7 @@ def list_documents(course_id: int, user: User = Depends(get_current_user), db: S
 def get_document(document_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> Document:
     document = db.get(Document, document_id)
     if not document:
-        raise HTTPException(status_code=404, detail="Document not found")
+        raise HTTPException(status_code=404, detail="文档不存在")
     get_owned_course(document.course_id, user, db)
     return document
 
@@ -62,8 +62,8 @@ def get_document(document_id: int, user: User = Depends(get_current_user), db: S
 def delete_document(document_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> dict[str, str]:
     document = db.get(Document, document_id)
     if not document:
-        raise HTTPException(status_code=404, detail="Document not found")
+        raise HTTPException(status_code=404, detail="文档不存在")
     get_owned_course(document.course_id, user, db)
     db.delete(document)
     db.commit()
-    return {"status": "deleted"}
+    return {"status": "已删除"}

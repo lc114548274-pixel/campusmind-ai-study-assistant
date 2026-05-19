@@ -57,4 +57,4 @@ def delete_course(course_id: int, user: User = Depends(get_current_user), db: Se
     course = get_owned_course(course_id, user, db)
     db.delete(course)
     db.commit()
-    return {"status": "deleted"}
+    return {"status": "已删除"}
