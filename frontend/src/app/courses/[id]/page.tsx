@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, use, useEffect, useMemo, useState } from "react";
 import { Bot, ClipboardList, FileUp, Languages, Loader2, MessageSquare, NotebookTabs, Send, Sparkles } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { api, ChatSource, Course, DocumentItem } from "@/lib/api";
@@ -17,8 +17,8 @@ function statusLabel(status: string) {
   return labels[status] || status;
 }
 
-export default function CoursePage({ params }: { params: { id: string } }) {
-  const courseId = params.id;
+export default function CoursePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id: courseId } = use(params);
   const [course, setCourse] = useState<Course | null>(null);
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
