@@ -38,11 +38,12 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
 
   async function upload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const file = (new FormData(event.currentTarget).get("file") as File) || null;
+    const formElement = event.currentTarget;
+    const file = (new FormData(formElement).get("file") as File) || null;
     if (!file || file.size === 0) return;
     setBusy("upload");
     await api.uploadDocument(courseId, file);
-    event.currentTarget.reset();
+    formElement.reset();
     await load();
     setBusy("");
   }
