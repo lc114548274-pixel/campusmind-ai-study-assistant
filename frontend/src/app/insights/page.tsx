@@ -16,10 +16,10 @@ export default function InsightsPage() {
     <Shell>
       <section className="mb-7 grid gap-5 lg:grid-cols-[1fr_360px]">
         <div className="tech-panel rounded p-7">
-          <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-cyan-50 px-3 py-1 text-sm font-semibold text-cyan-900">
+          <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
             <BarChart3 size={15} /> 可视化学习洞察
           </p>
-          <h1 className="text-4xl font-semibold text-ink">把学习过程变成可追踪的仪表盘</h1>
+          <h1 className="text-5xl font-semibold leading-tight text-slate-950">把学习过程变成可追踪的仪表盘</h1>
           <p className="mt-3 max-w-2xl text-slate-600">这里展示项目后续可扩展的个性化功能：学习进度、知识覆盖、复习热度和推荐动作。</p>
         </div>
         <div className="tech-panel rounded p-5">

@@ -113,8 +113,8 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
     <Shell>
       <section className="mb-6 grid gap-5 lg:grid-cols-[1fr_340px]">
         <div className="tech-panel rounded p-6">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-coral">课程详情</p>
-          <h1 className="text-4xl font-semibold text-ink">{course?.name || "正在加载..."}</h1>
+          <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">课程详情</p>
+          <h1 className="text-5xl font-semibold leading-tight text-slate-950">{course?.name || "正在加载..."}</h1>
           <p className="mt-3 max-w-3xl text-slate-600">{course?.description || "上传课件资料后即可构建这门课的知识库。"}</p>
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
             <div className="rounded bg-white p-4">

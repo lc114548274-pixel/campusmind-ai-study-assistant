@@ -38,10 +38,10 @@ export default function LabPage() {
   return (
     <Shell>
       <section className="mb-7 tech-panel rounded p-7">
-        <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-cyan-50 px-3 py-1 text-sm font-semibold text-cyan-900">
+        <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
           <Wand2 size={15} /> 动态配置工具台
         </p>
-        <h1 className="text-4xl font-semibold text-ink">AI 学习工具台</h1>
+        <h1 className="text-5xl font-semibold text-slate-950">AI 学习工具台</h1>
         <p className="mt-3 max-w-2xl text-slate-600">通过模式切换、语言选择和文本输入，快速生成术语解释、复习清单和概念讲解。这个页面展示了可扩展的功能配置流。</p>
       </section>
 

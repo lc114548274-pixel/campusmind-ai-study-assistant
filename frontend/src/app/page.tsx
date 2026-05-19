@@ -14,16 +14,16 @@ export default function HomePage() {
     <Shell>
       <section className="grid min-h-[calc(100vh-140px)] items-center gap-10 lg:grid-cols-[1.08fr_.92fr]">
         <div>
-          <span className="inline-flex items-center gap-2 rounded-full border border-cyan-300/40 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-900">
-            <span className="pulse-dot h-2 w-2 rounded-full bg-cyan-500" />
+          <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-soft">
+            <span className="pulse-dot h-2 w-2 rounded-full bg-mint" />
             <Sparkles size={16} /> Online AI Gateway · RAG Engine
           </span>
-          <h1 className="gradient-text mt-6 max-w-4xl text-5xl font-semibold leading-tight md:text-7xl">
+          <h1 className="gradient-text mt-6 max-w-4xl text-6xl font-semibold leading-[1.02] md:text-8xl">
             CampusMind
             <br />
             让课件变成你的 AI 学习搭子
           </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
+          <p className="mt-6 max-w-2xl text-xl leading-9 text-slate-600">
             上传课程 PDF，系统会自动解析、检索、总结并生成复习题。适合大学课程复习、考试准备和中英韩术语学习。
           </p>
           <div className="mt-8 flex flex-wrap gap-3">

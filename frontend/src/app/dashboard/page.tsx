@@ -49,10 +49,10 @@ export default function DashboardPage() {
     <Shell>
       <section className="mb-7 grid gap-5 lg:grid-cols-[1fr_380px]">
         <div className="tech-panel rounded p-7">
-          <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-cyan-50 px-3 py-1 text-sm font-semibold text-cyan-900">
+          <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
             <Sparkles size={15} /> 智能课程库
           </p>
-          <h1 className="text-4xl font-semibold text-ink md:text-5xl">选择一门课程，进入 AI 学习流程</h1>
+          <h1 className="max-w-3xl text-5xl font-semibold leading-tight text-slate-950 md:text-6xl">选择一门课程，进入 AI 学习流程</h1>
           <p className="mt-4 max-w-2xl text-slate-600">课程列表是整个系统的入口。你可以创建课程、上传 PDF、进入详情页进行问答、总结和复习题生成。</p>
           <div className="mt-6 flex max-w-xl items-center gap-3 rounded border border-slate-200 bg-white px-4 py-3">
             <Search size={18} className="text-slate-400" />
@@ -99,7 +99,7 @@ export default function DashboardPage() {
           return (
             <Link key={course.id} href={`/courses/${course.id}`} className="group tech-panel rounded p-5 transition hover:-translate-y-1 hover:border-cyan-300">
               <div className="mb-5 flex items-start justify-between gap-4">
-                <span className="grid h-12 w-12 place-items-center rounded bg-ink text-white">
+              <span className="grid h-12 w-12 place-items-center rounded bg-slate-950 text-white">
                   <BookOpen size={22} />
                 </span>
                 <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-600">
