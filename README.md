@@ -1,73 +1,82 @@
 # CampusMind
 
-CampusMind 是一个面向大学生的 AI 课程学习助手，支持上传课程 PDF、基于课件问答、自动总结重点、生成复习题，并提供中 / 英 / 韩术语解释。
+CampusMind 是一个面向大学生的 AI 课程学习助手。它支持上传课程 PDF、基于课件问答、自动总结重点、生成复习题，并提供中 / 英 / 韩术语解释。
 
-它的目标不是做一个普通聊天机器人，而是把学生自己的课件、讲义和教材 PDF 变成可检索的课程知识库，让 AI 尽量基于真实资料回答问题。
+项目采用科技风界面设计，包含多页面交互、动态网格背景、HUD 风格信息卡片、拖拽上传、学习数据可视化和 AI 工具台，适合作为完整的全栈 AI 作品集项目展示。
+
+## 项目亮点
+
+- 科技风 UI：深色导航、动态网格、发光边框、玻璃拟态卡片、扫描高光效果
+- 多页面结构：首页、课程列表、课程详情、AI 工具台、学习洞察、登录、注册
+- 多页面交互：课程列表 → 课程详情 → 上传 PDF → AI 问答 / 总结 / 复习题
+- 创新交互：拖拽上传 PDF、语言联动、模式切换、课程完成度进度条
+- 个性化功能：学习洞察仪表盘、功能使用热力、今日推荐
+- AI 能力：Ajou / Mindlogic API Gateway 在线回答，RAG 课件检索增强
 
 ## 核心功能
 
 - 用户注册与 JWT 登录
-- 课程创建与管理
+- 课程创建、搜索与管理
 - PDF 上传、解析、清洗、切分与索引
-- 通过 ChromaDB Server 进行向量检索
-- 基于 RAG 的课件问答，并返回来源引用
-- 面向考试复习的课件总结
+- 基于课件内容的 AI 问答
+- 自动生成课件总结
 - 自动生成选择题和答案解析
 - 中 / 英 / 韩术语解释与对照
-- 默认支持 OpenAI 兼容的在线模型
+- 学习洞察与可视化展示
+- 支持 Ajou / Mindlogic OpenAI-compatible API Gateway
 - 可选支持 Ollama 本地模型
-- 前后端 Docker 化部署
+
+## 页面结构
+
+| 页面 | 路由 | 说明 |
+|---|---|---|
+| 首页 | `/` | 科技风产品首页，展示系统定位与核心能力 |
+| 课程库 | `/dashboard` | 课程列表、搜索、创建课程、完成度展示 |
+| 课程详情 | `/courses/[id]` | PDF 上传、课件问答、总结、复习题、术语解释 |
+| AI 工具台 | `/lab` | 模式切换、语言联动、术语解释与学习工具 |
+| 学习洞察 | `/insights` | 数据卡片、进度可视化、学习流程展示 |
+| 登录 | `/login` | 用户登录 |
+| 注册 | `/register` | 用户注册 |
 
 ## 技术栈
 
 - 前端：Next.js、React、TypeScript、Tailwind CSS、lucide-react
-- 后端：FastAPI、SQLAlchemy、Pydantic
-- AI：默认 OpenAI 兼容在线模型，可选 Ollama 本地模型
-- 向量数据库：ChromaDB
-- 数据库：默认 SQLite，可通过 `DATABASE_URL` 切换 PostgreSQL / MySQL
+- 后端：FastAPI、SQLAlchemy、Pydantic、Uvicorn
+- AI：Ajou / Mindlogic API Gateway，OpenAI-compatible Chat Completions
+- RAG：PDF 文本切分、向量检索、Prompt 拼接、来源引用
+- 向量索引：ChromaDB Server，可退回本地 JSON 向量索引
+- 数据库：SQLite，支持通过 `DATABASE_URL` 切换 PostgreSQL / MySQL
 - PDF 解析：PyMuPDF
-- 部署：Docker Compose
+- 测试：pytest、Next.js build
+- 部署：Docker、Docker Compose
 
 ## 快速启动
 
 ### 1. 配置环境变量
 
+复制环境变量模板：
+
 ```bash
 cp .env.example .env
 ```
 
-推荐配置：在线 AI 回答 + 在线 embedding：
+推荐使用 Ajou / Mindlogic 网关：
 
 ```env
 AI_PROVIDER=openai
-EMBEDDING_PROVIDER=openai
-OPENAI_BASE_URL=https://api.openai.com/v1
+EMBEDDING_PROVIDER=mock
+OPENAI_BASE_URL=https://factchat-cloud.mindlogic.ai/v1/gateway
 OPENAI_API_KEY=your_key_here
-OPENAI_CHAT_MODEL=gpt-4o-mini
-OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+OPENAI_CHAT_MODEL=gpt-5-mini
 ```
 
-可选配置：本地 Ollama：
+说明：
 
-```env
-AI_PROVIDER=ollama
-EMBEDDING_PROVIDER=ollama
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_CHAT_MODEL=qwen2.5:7b
-OLLAMA_EMBEDDING_MODEL=nomic-embed-text
-```
-
-聊天回答和 embedding 默认都使用 OpenAI 兼容接口。如果 `OPENAI_API_KEY` 为空，并且 `ALLOW_MOCK_AI=true`，后端会启用开发兜底模式，方便本地演示流程，但不会产生真实 AI 回答。Chroma 以服务模式运行，避免 Windows 本地 HNSW 原生依赖编译问题。如果本地没有 Docker 或 Chroma，后端会自动退回到一个轻量 JSON 向量索引，让 MVP 流程仍然可以跑通。
+- `AI_PROVIDER=openai` 表示聊天回答使用 OpenAI 兼容接口。
+- `EMBEDDING_PROVIDER=mock` 表示课件检索使用本地兜底 embedding，适合没有 embedding 接口的网关。
+- `OPENAI_API_KEY` 必须填写完整 API Key，不能使用带星号的隐藏 key。
 
 ### 2. 启动后端
-
-如果安装了 Docker，建议先启动 Chroma：
-
-```bash
-docker compose up -d chroma
-```
-
-然后启动后端：
 
 ```bash
 cd backend
@@ -75,6 +84,18 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
+```
+
+后端地址：
+
+```text
+http://127.0.0.1:8000
+```
+
+API 文档：
+
+```text
+http://127.0.0.1:8000/docs
 ```
 
 ### 3. 启动前端
@@ -85,38 +106,50 @@ npm install
 npm run dev
 ```
 
-访问地址：
+前端地址：
 
-- 前端：http://localhost:3000
-- 后端 API 文档：http://localhost:8000/docs
+```text
+http://localhost:3000
+```
 
-### 4. Docker 一键启动
+### 4. Docker 启动
 
 ```bash
 docker compose up --build
 ```
 
-如果希望同时启动 Ollama：
+如果需要同时启动 Ollama：
 
 ```bash
 docker compose --profile local-ai up --build
 ```
 
-使用本地 Ollama 时，先拉取模型：
-
-```bash
-ollama pull qwen2.5:7b
-ollama pull nomic-embed-text
-```
-
 ## 使用流程
 
 1. 注册或登录账号。
-2. 创建课程，例如“计算机网络”。
-3. 上传课程 PDF。
-4. 后端提取文本、切分 chunk、生成 embedding，并写入 ChromaDB Server 或本地备用向量索引。
-5. 在课程页面提问。
-6. CampusMind 检索相关课件片段，把上下文交给模型，并返回带来源页码的回答。
+2. 进入课程库，创建课程。
+3. 从课程列表点击课程卡片进入详情页。
+4. 拖拽或选择上传 PDF。
+5. 等文档状态变为“已就绪”。
+6. 在问答区输入问题。
+7. 根据需要生成课件总结、复习题或术语解释。
+8. 进入学习洞察页查看可视化学习数据。
+
+## RAG 工作流程
+
+```text
+用户上传 PDF
+→ 后端保存文件
+→ PyMuPDF 提取文本
+→ 文本清洗与切分
+→ 生成向量或本地兜底 embedding
+→ 写入 ChromaDB / JSON 向量索引
+→ 用户提问
+→ 检索相关课件片段
+→ 拼接 Prompt
+→ 调用 Ajou / Mindlogic 在线模型
+→ 返回回答与来源页码
+```
 
 ## API 示例
 
@@ -127,37 +160,19 @@ POST /api/courses/{course_id}/documents/upload
 Content-Type: multipart/form-data
 ```
 
-课程问答请求：
+课程问答：
+
+```http
+POST /api/courses/{course_id}/chat
+```
+
+请求体：
 
 ```json
 {
   "question": "用中文解释 SDN 和 OpenFlow 的区别",
   "language": "zh"
 }
-```
-
-```http
-POST /api/courses/{course_id}/chat
-```
-
-## GitHub 仓库信息
-
-推荐仓库名：
-
-```text
-campusmind-ai-study-assistant
-```
-
-推荐描述：
-
-```text
-面向大学生的 AI 课程学习助手，支持 PDF 问答、课件总结和复习题生成。
-```
-
-推荐 Topics：
-
-```text
-ai rag llm ollama fastapi nextjs chromadb study-assistant pdf-chatbot university
 ```
 
 ## 项目结构
@@ -175,12 +190,54 @@ campusmind-ai-study-assistant/
   frontend/
     src/
       app/
+        dashboard/
+        courses/
+        lab/
+        insights/
+        login/
+        register/
       components/
       lib/
   docs/
   docker-compose.yml
 ```
 
-## 许可证
+## GitHub 信息
+
+推荐仓库名：
+
+```text
+campusmind-ai-study-assistant
+```
+
+推荐描述：
+
+```text
+面向大学生的科技风 AI 课程学习助手，支持 PDF 问答、课件总结、复习题生成和学习洞察。
+```
+
+推荐 Topics：
+
+```text
+ai rag llm fastapi nextjs chromadb study-assistant pdf-chatbot university
+```
+
+## 验证命令
+
+后端测试：
+
+```bash
+cd backend
+pytest
+```
+
+前端构建：
+
+```bash
+cd frontend
+npm run build
+```
+
+## License
 
 MIT

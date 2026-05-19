@@ -14,8 +14,9 @@ export default function HomePage() {
     <Shell>
       <section className="grid min-h-[calc(100vh-140px)] items-center gap-10 lg:grid-cols-[1.08fr_.92fr]">
         <div>
-          <span className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-4 py-2 text-sm font-semibold text-teal-800">
-            <Sparkles size={16} /> Local-first + Online AI Gateway
+          <span className="inline-flex items-center gap-2 rounded-full border border-cyan-300/40 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-900">
+            <span className="pulse-dot h-2 w-2 rounded-full bg-cyan-500" />
+            <Sparkles size={16} /> Online AI Gateway · RAG Engine
           </span>
           <h1 className="gradient-text mt-6 max-w-4xl text-5xl font-semibold leading-tight md:text-7xl">
             CampusMind
@@ -35,8 +36,8 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="glass-panel scan-line rounded p-6">
-          <div className="rounded bg-ink p-5 text-white">
+        <div className="tech-panel scan-line rounded p-6">
+          <div className="circuit-board rounded p-5 text-white">
             <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="grid h-11 w-11 place-items-center rounded bg-white/10">
@@ -47,11 +48,11 @@ export default function HomePage() {
                   <p className="text-sm text-white/55">Chapter 6 · Link Layer</p>
                 </div>
               </div>
-              <span className="rounded-full bg-teal-300/20 px-3 py-1 text-sm text-teal-100">已索引</span>
+              <span className="rounded-full border border-cyan-300/30 bg-cyan-300/15 px-3 py-1 text-sm text-cyan-100">已索引</span>
             </div>
             <div className="space-y-3">
               {["CRC 计算", "ARP 工作流程", "交换机学习与转发", "以太网帧结构"].map((item, index) => (
-                <div key={item} className="flex items-center gap-3 rounded border border-white/10 bg-white/8 p-3">
+                <div key={item} className="data-chip flex items-center gap-3 rounded p-3">
                   <span className="grid h-8 w-8 place-items-center rounded bg-white text-ink">{index + 1}</span>
                   <span>{item}</span>
                 </div>

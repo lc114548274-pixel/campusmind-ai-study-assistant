@@ -49,3 +49,19 @@ sequenceDiagram
 - `AI_PROVIDER=ollama`：使用 Ollama 本地模型生成回答。
 
 Embedding 默认由 OpenAI 兼容的 `/embeddings` 在线接口生成。开发阶段如果没有配置 API Key，并且 `ALLOW_MOCK_AI=true`，系统会使用确定性备用 embedding，保证基础流程可以演示。
+
+## 前端页面架构
+
+```mermaid
+flowchart LR
+  Home["首页 /"] --> Dashboard["课程库 /dashboard"]
+  Dashboard --> Course["课程详情 /courses/[id]"]
+  Course --> Chat["课件问答"]
+  Course --> Summary["课件总结"]
+  Course --> Quiz["复习题"]
+  Home --> Lab["AI 工具台 /lab"]
+  Home --> Insights["学习洞察 /insights"]
+  Dashboard --> Insights
+```
+
+前端采用科技风设计语言：深色导航、动态网格背景、玻璃拟态面板、HUD 风角标、发光边框、扫描高光和进度可视化。

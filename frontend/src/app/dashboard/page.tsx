@@ -48,8 +48,8 @@ export default function DashboardPage() {
   return (
     <Shell>
       <section className="mb-7 grid gap-5 lg:grid-cols-[1fr_380px]">
-        <div className="glass-panel rounded p-7">
-          <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-mint">
+        <div className="tech-panel rounded p-7">
+          <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-cyan-50 px-3 py-1 text-sm font-semibold text-cyan-900">
             <Sparkles size={15} /> 智能课程库
           </p>
           <h1 className="text-4xl font-semibold text-ink md:text-5xl">选择一门课程，进入 AI 学习流程</h1>
@@ -60,7 +60,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <form onSubmit={createCourse} className="glass-panel rounded p-5">
+        <form onSubmit={createCourse} className="tech-panel rounded p-5">
           <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
             <Plus size={19} /> 创建课程
           </h2>
@@ -97,7 +97,7 @@ export default function DashboardPage() {
         {filteredCourses.map((course, index) => {
           const progress = Math.min(96, 22 + course.document_count * 18 + index * 7);
           return (
-            <Link key={course.id} href={`/courses/${course.id}`} className="group glass-panel rounded p-5 transition hover:-translate-y-1 hover:border-teal-300">
+            <Link key={course.id} href={`/courses/${course.id}`} className="group tech-panel rounded p-5 transition hover:-translate-y-1 hover:border-cyan-300">
               <div className="mb-5 flex items-start justify-between gap-4">
                 <span className="grid h-12 w-12 place-items-center rounded bg-ink text-white">
                   <BookOpen size={22} />

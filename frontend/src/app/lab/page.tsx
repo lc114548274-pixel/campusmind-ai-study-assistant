@@ -37,8 +37,8 @@ export default function LabPage() {
 
   return (
     <Shell>
-      <section className="mb-7 glass-panel rounded p-7">
-        <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-mint">
+      <section className="mb-7 tech-panel rounded p-7">
+        <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-cyan-50 px-3 py-1 text-sm font-semibold text-cyan-900">
           <Wand2 size={15} /> 动态配置工具台
         </p>
         <h1 className="text-4xl font-semibold text-ink">AI 学习工具台</h1>
@@ -47,7 +47,7 @@ export default function LabPage() {
 
       <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
         <aside className="space-y-5">
-          <section className="glass-panel rounded p-5">
+          <section className="tech-panel rounded p-5">
             <h2 className="mb-4 text-lg font-semibold">选择模式</h2>
             <div className="grid gap-3">
               {modes.map((item) => {
@@ -72,7 +72,7 @@ export default function LabPage() {
             </div>
           </section>
 
-          <section className="glass-panel rounded p-5">
+          <section className="tech-panel rounded p-5">
             <h2 className="mb-4 text-lg font-semibold">输出语言</h2>
             <div className="grid grid-cols-3 gap-2">
               {[
@@ -92,7 +92,7 @@ export default function LabPage() {
           </section>
         </aside>
 
-        <form onSubmit={run} className="glass-panel rounded p-6">
+        <form onSubmit={run} className="tech-panel rounded p-6">
           <div className="mb-5 flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-semibold">{activeMode.label}</h2>

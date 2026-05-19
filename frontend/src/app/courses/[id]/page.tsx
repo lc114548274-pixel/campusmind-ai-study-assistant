@@ -112,7 +112,7 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
   return (
     <Shell>
       <section className="mb-6 grid gap-5 lg:grid-cols-[1fr_340px]">
-        <div className="glass-panel rounded p-6">
+        <div className="tech-panel rounded p-6">
           <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-coral">课程详情</p>
           <h1 className="text-4xl font-semibold text-ink">{course?.name || "正在加载..."}</h1>
           <p className="mt-3 max-w-3xl text-slate-600">{course?.description || "上传课件资料后即可构建这门课的知识库。"}</p>
@@ -132,7 +132,7 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
           </div>
         </div>
 
-        <div className="glass-panel rounded p-5">
+        <div className="tech-panel rounded p-5">
           <p className="mb-3 text-sm font-semibold text-slate-500">回答语言</p>
           <div className="grid grid-cols-3 gap-2">
             {[
@@ -172,7 +172,7 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
               const file = event.dataTransfer.files?.[0];
               if (file) await uploadFile(file);
             }}
-            className={`glass-panel rounded p-5 transition ${dragging ? "scale-[1.01] border-teal-400 bg-teal-50/80" : ""}`}
+            className={`tech-panel rounded p-5 transition ${dragging ? "scale-[1.01] border-cyan-400 bg-cyan-50/80" : ""}`}
           >
             <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
               <FileUp size={19} /> 上传 PDF
@@ -188,7 +188,7 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
             </button>
           </form>
 
-          <section className="glass-panel rounded p-5">
+          <section className="tech-panel rounded p-5">
             <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
               <NotebookTabs size={19} /> 课程文档
             </h2>
@@ -214,7 +214,7 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
         </aside>
 
         <section className="grid gap-6">
-          <div className="glass-panel overflow-hidden rounded">
+          <div className="tech-panel overflow-hidden rounded">
             <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
               <h2 className="flex items-center gap-2 text-lg font-semibold">
                 <MessageSquare size={19} /> 基于课件提问
