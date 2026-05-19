@@ -19,6 +19,12 @@ def _hash_embedding(text: str, size: int = 768) -> list[float]:
 
 
 async def embed_text(text: str) -> list[float]:
+    if settings.embedding_provider.lower() == "openai":
+        return await _embed_openai_compatible(text)
+    return await _embed_ollama(text)
+
+
+async def _embed_ollama(text: str) -> list[float]:
     try:
         async with httpx.AsyncClient(timeout=45) as client:
             response = await client.post(
@@ -28,6 +34,26 @@ async def embed_text(text: str) -> list[float]:
             response.raise_for_status()
             data = response.json()
             return data["embedding"]
+    except Exception:
+        if settings.allow_mock_ai:
+            return _hash_embedding(text)
+        raise
+
+
+async def _embed_openai_compatible(text: str) -> list[float]:
+    if not settings.openai_api_key:
+        if settings.allow_mock_ai:
+            return _hash_embedding(text)
+        raise RuntimeError("当 EMBEDDING_PROVIDER=openai 时必须配置 OPENAI_API_KEY")
+    try:
+        async with httpx.AsyncClient(timeout=60) as client:
+            response = await client.post(
+                f"{settings.openai_base_url.rstrip('/')}/embeddings",
+                headers={"Authorization": f"Bearer {settings.openai_api_key}"},
+                json={"model": settings.openai_embedding_model, "input": text},
+            )
+            response.raise_for_status()
+            return response.json()["data"][0]["embedding"]
     except Exception:
         if settings.allow_mock_ai:
             return _hash_embedding(text)

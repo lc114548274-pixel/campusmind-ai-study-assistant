@@ -9,8 +9,8 @@ flowchart TD
   B --> D[(ChromaDB Server)]
   B --> E[PDF 文件存储]
   B --> F{AI 模型提供方}
-  F --> G[Ollama 本地模型]
-  F --> H[OpenAI 兼容在线模型]
+  F --> G[OpenAI 兼容在线模型]
+  F --> H[Ollama 本地模型]
 ```
 
 ## 上传处理流程
@@ -45,7 +45,7 @@ sequenceDiagram
 
 ## AI 模式
 
-- `AI_PROVIDER=ollama`：使用 Ollama 本地模型生成回答。
 - `AI_PROVIDER=openai`：使用 OpenAI 兼容的 `/chat/completions` 在线接口生成回答。
+- `AI_PROVIDER=ollama`：使用 Ollama 本地模型生成回答。
 
-Embedding 默认由 Ollama 生成。开发阶段如果 Ollama 不可用，并且 `ALLOW_MOCK_AI=true`，系统会使用确定性备用 embedding，保证基础流程可以演示。
+Embedding 默认由 OpenAI 兼容的 `/embeddings` 在线接口生成。开发阶段如果没有配置 API Key，并且 `ALLOW_MOCK_AI=true`，系统会使用确定性备用 embedding，保证基础流程可以演示。
