@@ -19,7 +19,10 @@ def _hash_embedding(text: str, size: int = 768) -> list[float]:
 
 
 async def embed_text(text: str) -> list[float]:
-    if settings.embedding_provider.lower() == "openai":
+    provider = settings.embedding_provider.lower()
+    if provider == "mock":
+        return _hash_embedding(text)
+    if provider == "openai":
         return await _embed_openai_compatible(text)
     return await _embed_ollama(text)
 
@@ -32,8 +35,7 @@ async def _embed_ollama(text: str) -> list[float]:
                 json={"model": settings.ollama_embedding_model, "prompt": text},
             )
             response.raise_for_status()
-            data = response.json()
-            return data["embedding"]
+            return response.json()["embedding"]
     except Exception:
         if settings.allow_mock_ai:
             return _hash_embedding(text)
