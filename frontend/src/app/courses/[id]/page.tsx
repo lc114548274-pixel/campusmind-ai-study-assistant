@@ -204,8 +204,8 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
         </div>
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[390px_1fr]">
-        <aside className="space-y-5">
+      <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)_360px]">
+        <aside className="space-y-5 xl:sticky xl:top-24 xl:self-start">
           <form
             onSubmit={upload}
             onDragOver={(event) => {
@@ -267,17 +267,19 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
               </h2>
               <span className="text-sm text-slate-500">{readyDocuments.length} 份资料已就绪</span>
             </div>
-            <div className="max-h-[440px] min-h-[280px] space-y-4 overflow-y-auto p-5">
+            <div className="max-h-[620px] min-h-[440px] space-y-4 overflow-y-auto p-5">
               {messages.length === 0 && <p className="text-slate-500">上传 PDF 后即可提问。回答会引用检索到的课件片段，并给出复习建议。</p>}
               {messages.map((message, index) => (
                 <div key={index} className={message.role === "user" ? "ml-auto max-w-3xl rounded bg-slate-950 p-4 text-white" : "max-w-3xl rounded border border-slate-200 bg-white p-4"}>
                   <div className="prose-output whitespace-pre-wrap text-sm">{message.content}</div>
                   {message.sources && message.sources.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="mt-4 space-y-2">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">来源引用</p>
                       {message.sources.map((source) => (
-                        <span key={source.chunk_id} className="rounded-full bg-sky-50 px-2 py-1 text-xs text-sky-800">
-                          {source.document_name} 第 {source.page} 页
-                        </span>
+                        <div key={source.chunk_id} className="rounded-2xl border border-blue-100 bg-blue-50 p-3">
+                          <p className="text-sm font-semibold text-slate-950">{source.document_name} · Page {source.page}</p>
+                          {source.text && <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">“{source.text}”</p>}
+                        </div>
                       ))}
                     </div>
                   )}
@@ -296,8 +298,9 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
               </button>
             </form>
           </div>
+        </section>
 
-          <div className="grid gap-6 lg:grid-cols-2">
+        <aside className="space-y-6 xl:sticky xl:top-24 xl:self-start">
             <section className="glass-panel rounded p-5">
               <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
                 <ClipboardList size={19} /> Quiz 练习系统
@@ -361,7 +364,6 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
               </form>
               <div className="prose-output mt-4 max-h-72 overflow-y-auto whitespace-pre-wrap text-sm text-slate-700">{terms}</div>
             </section>
-          </div>
 
           {summary && (
             <section className="glass-panel rounded p-5">
@@ -371,7 +373,7 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
               <div className="prose-output whitespace-pre-wrap text-sm text-slate-700">{summary}</div>
             </section>
           )}
-        </section>
+        </aside>
       </div>
     </Shell>
   );

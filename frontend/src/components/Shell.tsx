@@ -18,19 +18,19 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
   return (
     <main className="min-h-screen">
-      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/86 text-slate-950 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/85 text-slate-950 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3">
           <Link href="/" className="flex items-center gap-3">
-            <span className="grid h-11 w-11 place-items-center rounded bg-slate-950 text-white shadow-soft">
+            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-blue-500 to-violet-500 text-white shadow-soft">
               <BookOpen size={21} />
             </span>
             <div>
               <p className="text-lg font-semibold leading-tight">CampusMind</p>
-              <p className="text-xs text-slate-500">AI 课程学习助手</p>
+              <p className="text-xs text-slate-500">AI Study Workspace</p>
             </div>
           </Link>
 
-          <nav className="hidden items-center gap-1 rounded-full border border-slate-200 bg-slate-50/80 p-1 md:flex">
+          <nav className="hidden items-center gap-1 rounded-full border border-slate-200 bg-slate-50 p-1 md:flex">
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
@@ -38,7 +38,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`inline-flex items-center gap-2 rounded px-3 py-2 text-sm font-medium transition ${
+                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
                     active ? "bg-white text-slate-950 shadow-soft" : "text-slate-500 hover:bg-white hover:text-slate-950"
                   }`}
                 >
@@ -50,12 +50,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="flex items-center gap-2">
-            <span className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 lg:flex">
-              <span className="pulse-dot h-2 w-2 rounded-full bg-mint" />
-              <Sparkles size={16} /> 在线 AI 已接入
+            <span className="hidden items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-2 text-sm text-blue-700 lg:flex">
+              <span className="h-2 w-2 rounded-full bg-blue-500" />
+              <Sparkles size={16} /> Online AI Ready
             </span>
             <button
-              className="grid h-10 w-10 place-items-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-coral hover:text-coral"
+              className="grid h-10 w-10 place-items-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-violet-300 hover:text-violet-600"
               title="退出登录"
               onClick={() => {
                 clearToken();

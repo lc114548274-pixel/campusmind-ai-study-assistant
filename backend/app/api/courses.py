@@ -12,6 +12,13 @@ router = APIRouter()
 def _read(course: Course) -> CourseRead:
     data = CourseRead.model_validate(course).model_dump()
     data["document_count"] = len(course.documents)
+    data["quiz_count"] = len(course.quizzes)
+    activity_dates = [course.created_at]
+    activity_dates.extend(document.created_at for document in course.documents)
+    activity_dates.extend(quiz.created_at for quiz in course.quizzes)
+    data["last_activity_at"] = max(activity_dates) if activity_dates else course.created_at
+    ready_documents = sum(1 for document in course.documents if document.status == "ready")
+    data["progress"] = min(100, 18 + ready_documents * 24 + len(course.quizzes) * 12)
     return CourseRead(**data)
 
 

@@ -1,89 +1,110 @@
-import { BarChart3, BookMarked, CheckCircle2, FileText, Flame, Gauge, Sparkles } from "lucide-react";
+"use client";
+
+import { useEffect, useState } from "react";
+import { BarChart3, BookMarked, CheckCircle2, FileText, Gauge, Sparkles, Target, Trophy } from "lucide-react";
 import Link from "next/link";
 import { Shell } from "@/components/Shell";
+import { api, StudyStats } from "@/lib/api";
 
-const bars = [
-  ["PDF 解析", 88],
-  ["课件问答", 76],
-  ["术语学习", 64],
-  ["复习题", 58]
-];
-
-const timeline = ["创建课程", "上传 PDF", "生成索引", "开始问答", "生成复习题"];
+const trend = [28, 42, 36, 58, 64, 72, 86];
+const weakPoints = ["Link Layer 地址解析", "数据库事务隔离级别", "OpenFlow 控制平面", "韩英术语互译"];
 
 export default function InsightsPage() {
+  const [stats, setStats] = useState<StudyStats | null>(null);
+
+  useEffect(() => {
+    api.studyStats().then(setStats).catch(() => setStats(null));
+  }, []);
+
+  const cards = [
+    [FileText, "总课程数", stats?.course_count ?? 0],
+    [BookMarked, "总文档数", stats?.document_count ?? 0],
+    [Trophy, "Quiz 完成数", stats?.attempt_count ?? 0],
+    [Gauge, "平均分", `${stats?.average_score ?? 0}%`]
+  ] as const;
+
   return (
     <Shell>
       <section className="mb-7 grid gap-5 lg:grid-cols-[1fr_360px]">
-        <div className="tech-panel rounded p-7">
-          <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
-            <BarChart3 size={15} /> 可视化学习洞察
+        <div className="tech-panel p-8">
+          <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700">
+            <BarChart3 size={15} /> 学习洞察
           </p>
-          <h1 className="text-5xl font-semibold leading-tight text-slate-950">把学习过程变成可追踪的仪表盘</h1>
-          <p className="mt-3 max-w-2xl text-slate-600">这里展示项目后续可扩展的个性化功能：学习进度、知识覆盖、复习热度和推荐动作。</p>
+          <h1 className="text-5xl font-semibold leading-tight tracking-tight text-slate-950">把学习过程变成可追踪的仪表盘。</h1>
+          <p className="mt-3 max-w-2xl leading-8 text-slate-600">这里汇总课程、资料、Quiz、平均分和近期活动。后续可以继续扩展成错题本、薄弱知识点和记忆曲线。</p>
         </div>
-        <div className="tech-panel rounded p-5">
-          <p className="text-sm text-slate-500">今日推荐</p>
-          <h2 className="mt-2 text-2xl font-semibold">先复习 Link Layer 的 ARP 与 Ethernet Frame</h2>
-          <Link href="/dashboard" className="mt-5 inline-flex items-center gap-2 rounded bg-mint px-4 py-2 font-semibold text-white hover:bg-ink">
+        <div className="tech-panel p-6">
+          <p className="text-sm font-semibold text-blue-600">今日推荐</p>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-950">先复习最近上传资料中的高频概念。</h2>
+          <p className="mt-3 text-sm leading-6 text-slate-600">建议先完成一套 Quiz，再回到课程详情页针对错题提问。</p>
+          <Link href="/dashboard" className="mt-5 inline-flex items-center gap-2 rounded-full bg-slate-950 px-4 py-2 font-semibold text-white hover:bg-blue-600">
             返回课程库 <Sparkles size={17} />
           </Link>
         </div>
       </section>
 
       <section className="mb-6 grid gap-4 md:grid-cols-4">
-        {[
-          [FileText, "资料页数", "46"],
-          [BookMarked, "知识片段", "128"],
-          [Flame, "复习热度", "高"],
-          [Gauge, "完成度", "76%"]
-        ].map(([Icon, label, value]) => {
-          const DisplayIcon = Icon as typeof FileText;
-          return (
-            <div key={String(label)} className="glass-panel rounded p-5">
-              <DisplayIcon className="text-mint" size={24} />
-              <p className="mt-4 text-sm text-slate-500">{String(label)}</p>
-              <p className="mt-1 text-3xl font-semibold">{String(value)}</p>
-            </div>
-          );
-        })}
+        {cards.map(([Icon, label, value]) => (
+          <div key={label} className="glass-panel p-5">
+            <Icon className="text-blue-600" size={24} />
+            <p className="mt-4 text-sm text-slate-500">{label}</p>
+            <p className="mt-1 text-3xl font-semibold text-slate-950">{value}</p>
+          </div>
+        ))}
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
-        <section className="glass-panel rounded p-6">
-          <h2 className="mb-5 text-2xl font-semibold">功能使用热力</h2>
-          <div className="space-y-5">
-            {bars.map(([label, value]) => (
-              <div key={label}>
-                <div className="mb-2 flex justify-between text-sm text-slate-600">
-                  <span>{label}</span>
-                  <span>{value}%</span>
-                </div>
-                <div className="h-3 overflow-hidden rounded-full bg-slate-100">
-                  <div className="h-full rounded-full bg-gradient-to-r from-mint via-sky-400 to-coral" style={{ width: `${value}%` }} />
-                </div>
+        <section className="glass-panel p-6">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-blue-600">Weekly Trend</p>
+              <h2 className="mt-1 text-2xl font-semibold text-slate-950">每周学习趋势</h2>
+            </div>
+            <span className="rounded-full bg-green-50 px-3 py-1 text-sm font-medium text-green-700">+18%</span>
+          </div>
+          <div className="flex h-64 items-end gap-3 rounded-3xl bg-slate-50 p-5">
+            {trend.map((value, index) => (
+              <div key={index} className="flex flex-1 flex-col items-center gap-2">
+                <div className="w-full rounded-t-2xl bg-gradient-to-t from-blue-500 to-violet-400" style={{ height: `${value}%` }} />
+                <span className="text-xs text-slate-500">D{index + 1}</span>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="glass-panel rounded p-6">
-          <h2 className="mb-5 text-2xl font-semibold">学习流程</h2>
-          <div className="space-y-4">
-            {timeline.map((item, index) => (
-              <div key={item} className="flex items-center gap-3 rounded border border-slate-200 bg-white p-3">
-                <span className="grid h-9 w-9 place-items-center rounded bg-teal-50 text-mint">
+        <section className="glass-panel p-6">
+          <h2 className="mb-5 text-2xl font-semibold text-slate-950">最近学习活动</h2>
+          <div className="space-y-3">
+            {(stats?.recent_activity || []).length === 0 && <p className="text-sm text-slate-500">暂无活动。上传 PDF 或生成 Quiz 后会显示在这里。</p>}
+            {(stats?.recent_activity || []).map((item) => (
+              <div key={`${item.type}-${item.title}-${item.created_at}`} className="flex items-center gap-3 rounded-3xl border border-slate-200 bg-white p-3">
+                <span className="grid h-9 w-9 place-items-center rounded-2xl bg-blue-50 text-blue-600">
                   <CheckCircle2 size={18} />
                 </span>
-                <div>
-                  <p className="font-semibold">{item}</p>
-                  <p className="text-xs text-slate-500">Step {index + 1}</p>
+                <div className="min-w-0">
+                  <p className="truncate font-semibold text-slate-950">{item.title}</p>
+                  <p className="text-xs text-slate-500">{item.type} · {item.status}</p>
                 </div>
               </div>
             ))}
           </div>
         </section>
       </div>
+
+      <section className="mt-6 glass-panel p-6">
+        <div className="mb-5 flex items-center gap-2">
+          <Target className="text-violet-600" size={22} />
+          <h2 className="text-2xl font-semibold text-slate-950">薄弱知识点</h2>
+        </div>
+        <div className="grid gap-3 md:grid-cols-4">
+          {weakPoints.map((item) => (
+            <div key={item} className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+              <p className="font-semibold text-slate-950">{item}</p>
+              <p className="mt-2 text-sm text-slate-500">建议生成专项 Quiz 并查看解析。</p>
+            </div>
+          ))}
+        </div>
+      </section>
     </Shell>
   );
 }

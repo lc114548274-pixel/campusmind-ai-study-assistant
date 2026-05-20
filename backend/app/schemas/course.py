@@ -19,5 +19,8 @@ class CourseRead(BaseModel):
     description: str | None
     created_at: datetime
     document_count: int = 0
+    quiz_count: int = 0
+    last_activity_at: datetime | None = None
+    progress: int = 0
 
     model_config = {"from_attributes": True}

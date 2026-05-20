@@ -13,6 +13,9 @@ export type Course = {
   description: string | null;
   created_at: string;
   document_count: number;
+  quiz_count: number;
+  last_activity_at?: string | null;
+  progress: number;
 };
 
 export type DocumentItem = {
