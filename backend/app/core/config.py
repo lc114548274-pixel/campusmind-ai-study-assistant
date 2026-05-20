@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     app_name: str = "CampusMind"
     app_env: str = "development"
     frontend_url: str = "http://localhost:3000"
+    cors_extra_origins: str = ""
     database_url: str = "sqlite:///./campusmind.db"
 
     upload_dir: Path = Path("./storage/uploads")
@@ -40,7 +41,10 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins(self) -> list[str]:
-        return [self.frontend_url, "http://127.0.0.1:3000", "http://localhost:3000"]
+        configured = [self.frontend_url, *self.cors_extra_origins.split(",")]
+        defaults = ["http://127.0.0.1:3000", "http://localhost:3000"]
+        origins = [origin.strip().rstrip("/") for origin in [*configured, *defaults] if origin.strip()]
+        return list(dict.fromkeys(origins))
 
 
 @lru_cache

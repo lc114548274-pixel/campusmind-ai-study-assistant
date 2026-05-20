@@ -1,4 +1,11 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+function resolveApiBase() {
+  const configured = process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (configured && configured !== "auto") return configured;
+  if (typeof window === "undefined") return "http://localhost:8000";
+  return `${window.location.protocol}//${window.location.hostname}:8000`;
+}
+
+const API_BASE = resolveApiBase();
 
 export type Course = {
   id: number;

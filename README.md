@@ -112,7 +112,43 @@ npm run dev
 http://localhost:3000
 ```
 
-### 4. Docker 启动
+### 4. 同一 Wi-Fi 下跨设备访问
+
+如果要在手机或另一台电脑上打开，不要使用 `localhost`。先查看当前电脑的局域网 IP：
+
+```powershell
+ipconfig
+```
+
+假设电脑 IP 是 `192.168.1.23`，在 `.env` 中设置：
+
+```env
+FRONTEND_URL=http://192.168.1.23:3000
+CORS_EXTRA_ORIGINS=http://192.168.1.23:3000
+NEXT_PUBLIC_API_BASE_URL=auto
+```
+
+后端需要监听所有网卡：
+
+```bash
+cd backend
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+前端也需要监听所有网卡：
+
+```bash
+cd frontend
+npm run dev:host
+```
+
+然后在同一 Wi-Fi 的其他设备浏览器打开：
+
+```text
+http://192.168.1.23:3000
+```
+
+### 5. Docker 启动
 
 ```bash
 docker compose up --build
