@@ -1,97 +1,146 @@
 # CampusMind
 
-CampusMind 是一个面向大学生的 AI 课程学习助手，支持上传课程 PDF、基于课件问答、自动总结重点、生成复习题，并提供中 / 英 / 韩术语解释。
+CampusMind 是一个面向大学生的 AI 课程学习助手。它可以把课程 PDF、讲义和教材变成可检索、可问答、可总结、可练习的课程知识库，帮助学生更高效地复习和理解课程内容。
 
-项目现在采用 Apple 官网式高级感设计：明亮背景、超大标题、充足留白、高对比排版、柔和卡片、轻动画和清晰的多页面学习流程。它既可以作为可运行的课程学习系统，也适合作为 GitHub 项目主页、作品集和求职展示项目。
+项目采用 Apple 官网式的明亮高级感设计，包含完整的多页面交互、RAG 检索增强、批量文档上传、Quiz 练习系统、用户系统和学习统计能力。
 
-## 项目亮点
+## 项目介绍
 
-- 高级感 UI：明亮留白、大标题、柔和渐变、卡片布局、轻量动效和高可读文字。
-- 多页面结构：首页、课程库、课程详情、AI 工具台、学习洞察、登录、注册。
-- 多页面交互：课程列表 -> 课程详情 -> 上传 PDF -> AI 问答 / 总结 / 复习题。
-- 创新交互：多 PDF 拖拽上传、模式切换、语言联动、课程进度展示。
-- 个性化功能：学习洞察仪表盘、功能使用热力、今日推荐、练习得分反馈。
-- AI 能力：Ajou / Mindlogic API Gateway 在线回答，RAG 混合检索与多文档引用。
+大学生学习时常常会遇到三个问题：
 
-## 核心功能
+- 课件、教材和讲义很多，但检索困难。
+- 普通 AI 不知道自己的课程内容，回答容易泛泛而谈。
+- 复习缺少闭环，不能从“看资料”自然进入“总结、练习、纠错”。
 
-- 用户注册与 JWT 登录
-- 课程创建、搜索与管理
-- PDF 上传、解析、清洗、切分与索引
-- 多文档上传与统一课程知识库
-- 基于课件内容的 AI 问答，支持来源页码引用
-- 自动生成课件总结
-- 自动生成结构化选择题、答案解析与自动判分
+CampusMind 的目标是把学生自己的课程资料转化成 AI 学习工作台：
+
+```text
+上传课程 PDF -> 解析文本 -> 切分知识片段 -> 建立向量索引
+-> 基于课件问答 -> 自动总结 -> 生成 Quiz -> 作答判分 -> 学习统计
+```
+
+## 功能列表
+
+- 用户注册、登录和 JWT 鉴权
+- 课程创建、课程列表和课程详情管理
+- 支持单个 PDF 上传和多 PDF 批量上传
+- 自动解析 PDF 文本、切分 chunk、建立课程知识库
+- 基于课程资料的 RAG 问答
+- 回答中展示来源文件和页码
+- 自动生成课件总结和复习清单
+- 生成结构化选择题 Quiz
+- 前端作答、后端自动判分、返回解析反馈
 - 中 / 英 / 韩术语解释与对照
-- 学习洞察与可视化展示
-- 用户级学习统计、Quiz 尝试记录和平均得分
-- 支持 Ajou / Mindlogic OpenAI-compatible API Gateway
-- 可选支持 Ollama 本地模型
-
-## 页面结构
-
-| 页面 | 路由 | 说明 |
-|---|---|---|
-| 首页 | `/` | Apple 风格项目主页，展示产品定位、核心能力和入口 |
-| 课程库 | `/dashboard` | 课程列表、搜索、创建课程、完成度展示 |
-| 课程详情 | `/courses/[id]` | PDF 上传、课件问答、总结、复习题、术语解释 |
-| AI 工具台 | `/lab` | 模式切换、语言联动、术语解释与学习工具 |
-| 学习洞察 | `/insights` | 数据卡片、进度可视化、学习流程展示 |
-| 登录 | `/login` | 用户登录 |
-| 注册 | `/register` | 用户注册 |
+- 学习统计：课程数、文档数、题库数、练习次数、平均得分、近期活动
+- 多页面交互：首页、课程库、课程详情、AI 工具台、学习洞察、登录、注册
+- 支持本机开发、局域网演示和 Docker 部署
 
 ## 技术栈
 
-- 前端：Next.js、React、TypeScript、Tailwind CSS、lucide-react
-- 后端：FastAPI、SQLAlchemy、Pydantic、Uvicorn
-- AI：Ajou / Mindlogic API Gateway，OpenAI-compatible Chat Completions
-- RAG：PDF 文本切分、语义检索、关键词混合重排、多文档去重、Prompt 拼接、来源引用
-- 向量索引：ChromaDB Server，可回退为本地 JSON 向量索引
-- 数据库：SQLite，支持通过 `DATABASE_URL` 切换 PostgreSQL / MySQL
-- PDF 解析：PyMuPDF
-- 测试：pytest、Next.js build
-- 部署：Docker、Docker Compose
+| 模块 | 技术 |
+|---|---|
+| 前端 | Next.js 16、React 19、TypeScript、Tailwind CSS、lucide-react |
+| 后端 | FastAPI、SQLAlchemy、Pydantic、Uvicorn |
+| AI | Ajou / Mindlogic API Gateway，OpenAI-compatible Chat Completions |
+| RAG | PDF 文本解析、chunk 切分、embedding、语义检索、关键词重排、Prompt 组装 |
+| 向量索引 | ChromaDB Server，支持回退到本地 JSON 向量索引 |
+| 数据库 | SQLite，支持通过 `DATABASE_URL` 切换 PostgreSQL / MySQL |
+| PDF 解析 | PyMuPDF |
+| 测试 | pytest、Next.js build |
+| 部署 | Docker、Docker Compose |
 
-## 快速启动
+## 系统架构
 
-### 1. 配置环境变量
-
-复制环境变量模板：
-
-```bash
-cp .env.example .env
+```mermaid
+flowchart TD
+  A["Next.js 前端"] -->|"HTTP API / JWT"| B["FastAPI 后端"]
+  B --> C[("SQL 数据库")]
+  B --> D[("ChromaDB / JSON 向量索引")]
+  B --> E["PDF 文件存储"]
+  B --> F["RAG 服务层"]
+  F --> G["Embedding 服务"]
+  F --> H["Ajou / Mindlogic 在线模型"]
+  F --> I["Ollama 本地模型 可选"]
 ```
 
-推荐使用 Ajou / Mindlogic 网关：
+### RAG 问答流程
 
-```env
-AI_PROVIDER=openai
-EMBEDDING_PROVIDER=mock
-OPENAI_BASE_URL=https://factchat-cloud.mindlogic.ai/v1/gateway
-OPENAI_API_KEY=your_key_here
-OPENAI_CHAT_MODEL=gpt-5-mini
+```mermaid
+sequenceDiagram
+  participant U as 用户
+  participant Web as Next.js 前端
+  participant API as FastAPI 后端
+  participant RAG as RAG 服务
+  participant V as 向量索引
+  participant LLM as 在线 AI 模型
+
+  U->>Web: 上传 PDF / 提问
+  Web->>API: 调用课程 API
+  API->>RAG: 解析问题并生成 embedding
+  RAG->>V: 检索相关课件片段
+  RAG->>RAG: 关键词重排 + 多文档去重
+  RAG->>LLM: 拼接 Prompt 并调用模型
+  LLM-->>RAG: 返回回答
+  RAG-->>API: 回答 + 来源页码
+  API-->>Web: 展示回答、引用和复习建议
 ```
 
-说明：
+### Quiz 学习闭环
 
-- `AI_PROVIDER=openai` 表示聊天回答使用 OpenAI 兼容接口。
-- `EMBEDDING_PROVIDER=mock` 表示课件检索使用本地哈希 embedding，适合没有 embedding 接口的网关。
-- `OPENAI_API_KEY` 必须填写完整 API Key，不能使用带星号的隐藏 key。
-
-### 2. 启动后端
-
-```bash
-cd backend
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
+```mermaid
+flowchart LR
+  A["课程资料"] --> B["检索考点"]
+  B --> C["生成结构化 Quiz"]
+  C --> D["学生作答"]
+  D --> E["自动判分"]
+  E --> F["解析反馈"]
+  F --> G["学习统计"]
 ```
 
-后端地址：
+## 项目截图
+
+### 首页
+
+![CampusMind 首页](deliverables/assets/home.png)
+
+### 课程库
+
+![CampusMind 课程库](deliverables/assets/dashboard.png)
+
+### 学习洞察
+
+![CampusMind 学习洞察](deliverables/assets/insights.png)
+
+## 运行方式
+
+### 方式一：Windows 本地一键启动
+
+双击项目根目录中的：
 
 ```text
-http://127.0.0.1:8000
+start-local.bat
+```
+
+或者在 PowerShell 中运行：
+
+```powershell
+.\start-local.ps1
+```
+
+脚本会自动完成：
+
+- 检查并创建 `.env`
+- 创建后端虚拟环境
+- 安装后端依赖
+- 安装前端依赖
+- 启动 FastAPI 后端
+- 启动 Next.js 前端
+- 自动打开浏览器
+
+启动后访问：
+
+```text
+http://localhost:3000
 ```
 
 API 文档：
@@ -100,23 +149,64 @@ API 文档：
 http://127.0.0.1:8000/docs
 ```
 
-### 3. 启动前端
+### 方式二：手动启动
+
+复制环境变量：
 
 ```bash
-cd frontend
-npm install
-npm run dev
+cp .env.example .env
 ```
 
-前端地址：
+推荐配置：
+
+```env
+AI_PROVIDER=openai
+EMBEDDING_PROVIDER=mock
+OPENAI_BASE_URL=https://factchat-cloud.mindlogic.ai/v1/gateway
+OPENAI_API_KEY=your_key_here
+OPENAI_CHAT_MODEL=gpt-5-mini
+NEXT_PUBLIC_API_BASE_URL=auto
+```
+
+启动后端：
+
+```powershell
+cd backend
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+启动前端：
+
+```powershell
+cd frontend
+npm install
+npm run dev:host
+```
+
+打开：
 
 ```text
 http://localhost:3000
 ```
 
-### 4. 同一 Wi-Fi 下跨设备访问
+### 方式三：Docker 启动
 
-如果要在手机或另一台电脑上打开，不要使用 `localhost`。先查看当前电脑的局域网 IP：
+```bash
+docker compose up --build
+```
+
+如果需要同时启动 Ollama：
+
+```bash
+docker compose --profile local-ai up --build
+```
+
+### 局域网访问
+
+如果要让手机或另一台电脑访问，先查看当前电脑 IP：
 
 ```powershell
 ipconfig
@@ -130,90 +220,24 @@ CORS_EXTRA_ORIGINS=http://192.168.1.23:3000
 NEXT_PUBLIC_API_BASE_URL=auto
 ```
 
-后端需要监听所有网卡：
-
-```bash
-cd backend
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
-
-前端也需要监听所有网卡：
-
-```bash
-cd frontend
-npm run dev:host
-```
-
-然后在同一 Wi-Fi 的其他设备浏览器打开：
+其他设备打开：
 
 ```text
 http://192.168.1.23:3000
-```
-
-### 5. Docker 启动
-
-```bash
-docker compose up --build
-```
-
-如果需要同时启动 Ollama：
-
-```bash
-docker compose --profile local-ai up --build
 ```
 
 ## 使用流程
 
 1. 注册或登录账号。
 2. 进入课程库，创建课程。
-3. 从课程列表点击课程卡片进入详情页。
-4. 拖拽或选择上传 PDF。
-5. 可以一次上传多份 PDF，把同一门课的讲义统一加入知识库。
-6. 等文档状态变为“已就绪”。
-7. 在问答区输入问题，回答会附带来源文件和页码。
-8. 生成结构化 Quiz，作答后查看得分和解析。
-9. 根据需要生成课件总结、复习题或术语解释。
-10. 进入学习洞察页查看可视化学习数据。
-
-## RAG 工作流程
-
-```text
-用户上传 PDF
--> 后端保存文件
--> PyMuPDF 提取文本
--> 文本清洗与切分
--> 生成向量或本地哈希 embedding
--> 写入 ChromaDB / JSON 向量索引
--> 用户提问
--> 语义检索 + 关键词重排 + 多文档去重
--> 拼接 Prompt
--> 调用 Ajou / Mindlogic 在线模型
--> 返回回答与来源页码
-```
-
-## API 示例
-
-上传 PDF：
-
-```http
-POST /api/courses/{course_id}/documents/upload
-Content-Type: multipart/form-data
-```
-
-课程问答：
-
-```http
-POST /api/courses/{course_id}/chat
-```
-
-请求体：
-
-```json
-{
-  "question": "用中文解释 SDN 和 OpenFlow 的区别",
-  "language": "zh"
-}
-```
+3. 进入课程详情页。
+4. 上传一份或多份 PDF。
+5. 等文档状态变为“已就绪”。
+6. 在问答区输入课程问题。
+7. 查看 AI 回答、来源文件和页码。
+8. 生成课程总结或 Quiz。
+9. 完成 Quiz 作答，查看得分和解析。
+10. 在学习洞察中查看整体学习状态。
 
 ## 项目结构
 
@@ -239,7 +263,39 @@ campusmind-ai-study-assistant/
       components/
       lib/
   docs/
+  deliverables/
   docker-compose.yml
+  start-local.bat
+  start-local.ps1
+```
+
+## 未来计划
+
+- 支持扫描版 PDF OCR
+- 支持 PPTX、DOCX、图片课件解析
+- 增加错题本和薄弱知识点归纳
+- 增加记忆卡片和间隔复习
+- 支持流式 AI 回答
+- 支持学习总结、Quiz、错题本导出为 PDF / Word
+- 引入后台任务队列，处理大文件解析
+- 增加教师端和班级课程空间
+- 增加知识图谱可视化
+- 增加 GitHub Actions CI/CD 和云端部署配置
+
+## 验证命令
+
+后端测试：
+
+```bash
+cd backend
+python -m pytest
+```
+
+前端构建：
+
+```bash
+cd frontend
+npm run build
 ```
 
 ## GitHub 信息
@@ -260,22 +316,6 @@ campusmind-ai-study-assistant
 
 ```text
 ai rag llm fastapi nextjs chromadb study-assistant pdf-chatbot university
-```
-
-## 验证命令
-
-后端测试：
-
-```bash
-cd backend
-python -m pytest
-```
-
-前端构建：
-
-```bash
-cd frontend
-npm run build
 ```
 
 ## License
