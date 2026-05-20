@@ -34,6 +34,35 @@ export type ChatSource = {
   text?: string | null;
 };
 
+export type Quiz = {
+  id: number;
+  course_id: number;
+  title: string;
+  content: string;
+  created_at: string;
+};
+
+export type QuizAttempt = {
+  id: number;
+  quiz_id: number;
+  answers: string;
+  score: number;
+  total: number;
+  feedback?: string | null;
+  created_at: string;
+};
+
+export type StudyStats = {
+  course_count: number;
+  document_count: number;
+  ready_document_count: number;
+  chunk_count: number;
+  quiz_count: number;
+  attempt_count: number;
+  average_score: number;
+  recent_activity: Array<{ type: string; title: string; status: string; created_at: string }>;
+};
+
 export function getToken() {
   if (typeof window === "undefined") return "";
   return localStorage.getItem("campusmind_token") || "";
@@ -75,6 +104,11 @@ export const api = {
     form.append("file", file);
     return request<DocumentItem>(`/api/courses/${courseId}/documents/upload`, { method: "POST", body: form });
   },
+  uploadDocuments: (courseId: string, files: File[]) => {
+    const form = new FormData();
+    files.forEach((file) => form.append("files", file));
+    return request<DocumentItem[]>(`/api/courses/${courseId}/documents/bulk-upload`, { method: "POST", body: form });
+  },
   chat: (courseId: string, payload: { question: string; language: string; session_id?: number }) =>
     request<{ answer: string; session_id: number; sources: ChatSource[] }>(`/api/courses/${courseId}/chat`, {
       method: "POST",
@@ -85,11 +119,18 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ language, force })
     }),
-  quiz: (courseId: string, payload: { question_type: string; count: number; language: string }) =>
-    request<{ content: string }>(`/api/courses/${courseId}/quiz`, {
+  quizzes: (courseId: string) => request<Quiz[]>(`/api/courses/${courseId}/quiz`),
+  quiz: (courseId: string, payload: { question_type: string; count: number; language: string; difficulty?: string; focus?: string }) =>
+    request<Quiz>(`/api/courses/${courseId}/quiz`, {
       method: "POST",
       body: JSON.stringify(payload)
     }),
+  submitQuiz: (quizId: number, answers: Record<string, string>) =>
+    request<QuizAttempt>(`/api/quiz/${quizId}/attempts`, {
+      method: "POST",
+      body: JSON.stringify({ answers })
+    }),
+  studyStats: () => request<StudyStats>("/api/study/stats"),
   terms: (payload: { text: string; source_language: string; target_language: string }) =>
     request<{ content: string }>("/api/terms/translate", { method: "POST", body: JSON.stringify(payload) })
 };

@@ -56,7 +56,7 @@ class ChatSession(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     course_id: Mapped[int] = mapped_column(ForeignKey("courses.id", ondelete="CASCADE"), index=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
-    title: Mapped[str] = mapped_column(String(160), default="新聊天")
+    title: Mapped[str] = mapped_column(String(160), default="新会话")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     course: Mapped[Course] = relationship(back_populates="chat_sessions")
@@ -97,3 +97,19 @@ class Quiz(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     course: Mapped[Course] = relationship(back_populates="quizzes")
+    attempts: Mapped[list["QuizAttempt"]] = relationship(back_populates="quiz", cascade="all, delete-orphan")
+
+
+class QuizAttempt(Base):
+    __tablename__ = "quiz_attempts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    quiz_id: Mapped[int] = mapped_column(ForeignKey("quizzes.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    answers: Mapped[str] = mapped_column(Text)
+    score: Mapped[int] = mapped_column(Integer, default=0)
+    total: Mapped[int] = mapped_column(Integer, default=0)
+    feedback: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    quiz: Mapped[Quiz] = relationship(back_populates="attempts")

@@ -13,22 +13,17 @@ from app.services.rag_service import index_document
 router = APIRouter()
 
 
-@router.post("/courses/{course_id}/documents/upload", response_model=DocumentRead)
-async def upload_document(
-    course_id: int,
-    file: UploadFile = File(...),
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-) -> Document:
-    get_owned_course(course_id, user, db)
+async def _create_document(course_id: int, file: UploadFile, db: Session) -> Document:
     try:
         path = await save_upload(file, course_id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    document = Document(course_id=course_id, file_name=file.filename or "课件.pdf", file_path=str(path), status="processing")
+
+    document = Document(course_id=course_id, file_name=file.filename or "course.pdf", file_path=str(path), status="processing")
     db.add(document)
     db.commit()
     db.refresh(document)
+
     try:
         page_count, chunks = parse_pdf_chunks(Path(document.file_path))
         chunk_count = await index_document(document, chunks)
@@ -38,9 +33,34 @@ async def upload_document(
     except Exception as exc:
         document.status = "failed"
         document.error_message = str(exc)
+
     db.commit()
     db.refresh(document)
     return document
+
+
+@router.post("/courses/{course_id}/documents/upload", response_model=DocumentRead)
+async def upload_document(
+    course_id: int,
+    file: UploadFile = File(...),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> Document:
+    get_owned_course(course_id, user, db)
+    return await _create_document(course_id, file, db)
+
+
+@router.post("/courses/{course_id}/documents/bulk-upload", response_model=list[DocumentRead])
+async def bulk_upload_documents(
+    course_id: int,
+    files: list[UploadFile] = File(...),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> list[Document]:
+    get_owned_course(course_id, user, db)
+    if len(files) > 8:
+        raise HTTPException(status_code=400, detail="一次最多上传 8 个 PDF 文件")
+    return [await _create_document(course_id, file, db) for file in files]
 
 
 @router.get("/courses/{course_id}/documents", response_model=list[DocumentRead])

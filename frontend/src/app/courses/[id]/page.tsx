@@ -3,21 +3,25 @@
 import { FormEvent, use, useEffect, useMemo, useState } from "react";
 import {
   Bot,
+  CheckCircle2,
   ClipboardList,
   FileSearch,
   FileUp,
   Languages,
+  Layers3,
   Loader2,
   MessageSquare,
-  NotebookTabs,
   Send,
   Sparkles,
+  Target,
   UploadCloud
 } from "lucide-react";
 import { Shell } from "@/components/Shell";
-import { api, ChatSource, Course, DocumentItem } from "@/lib/api";
+import { api, ChatSource, Course, DocumentItem, Quiz, QuizAttempt, StudyStats } from "@/lib/api";
 
 type Message = { role: "user" | "assistant"; content: string; sources?: ChatSource[] };
+type ParsedQuestion = { id: string; question: string; options?: string[]; answer?: string; explanation?: string; source?: string };
+type ParsedQuiz = { title?: string; questions?: ParsedQuestion[] };
 
 function statusLabel(status: string) {
   const labels: Record<string, string> = {
@@ -29,31 +33,62 @@ function statusLabel(status: string) {
   return labels[status] || status;
 }
 
+function parseQuiz(content: string): ParsedQuiz | null {
+  try {
+    return JSON.parse(content);
+  } catch {
+    const match = content.match(/\{[\s\S]*\}/);
+    if (!match) return null;
+    try {
+      return JSON.parse(match[0]);
+    } catch {
+      return null;
+    }
+  }
+}
+
 export default function CoursePage({ params }: { params: Promise<{ id: string }> }) {
   const { id: courseId } = use(params);
   const [course, setCourse] = useState<Course | null>(null);
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [stats, setStats] = useState<StudyStats | null>(null);
+  const [activeQuiz, setActiveQuiz] = useState<Quiz | null>(null);
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
+  const [attempt, setAttempt] = useState<QuizAttempt | null>(null);
   const [sessionId, setSessionId] = useState<number | undefined>();
   const [language, setLanguage] = useState("zh");
+  const [difficulty, setDifficulty] = useState("medium");
+  const [focus, setFocus] = useState("");
   const [busy, setBusy] = useState("");
   const [summary, setSummary] = useState("");
-  const [quiz, setQuiz] = useState("");
   const [terms, setTerms] = useState("");
   const [dragging, setDragging] = useState(false);
 
   const readyDocuments = useMemo(() => documents.filter((doc) => doc.status === "ready"), [documents]);
   const totalChunks = documents.reduce((sum, doc) => sum + doc.chunk_count, 0);
+  const parsedQuiz = activeQuiz ? parseQuiz(activeQuiz.content) : null;
 
   async function load() {
-    const [courseData, docs] = await Promise.all([api.course(courseId), api.documents(courseId)]);
+    const [courseData, docs, quizList, statsData] = await Promise.all([
+      api.course(courseId),
+      api.documents(courseId),
+      api.quizzes(courseId),
+      api.studyStats().catch(() => null)
+    ]);
     setCourse(courseData);
     setDocuments(docs);
+    setQuizzes(quizList);
+    setStats(statsData);
+    if (!activeQuiz && quizList.length > 0) setActiveQuiz(quizList[0]);
   }
 
-  async function uploadFile(file: File) {
+  async function uploadFiles(files: File[]) {
+    if (files.length === 0) return;
     setBusy("upload");
-    await api.uploadDocument(courseId, file);
+    if (files.length === 1) await api.uploadDocument(courseId, files[0]);
+    else await api.uploadDocuments(courseId, files);
     await load();
     setBusy("");
   }
@@ -61,9 +96,8 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
   async function upload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formElement = event.currentTarget;
-    const file = (new FormData(formElement).get("file") as File) || null;
-    if (!file || file.size === 0) return;
-    await uploadFile(file);
+    const input = formElement.elements.namedItem("files") as HTMLInputElement | null;
+    await uploadFiles(Array.from(input?.files || []));
     formElement.reset();
   }
 
@@ -88,10 +122,22 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
     setBusy("");
   }
 
-  async function runQuiz() {
+  async function runQuiz(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     setBusy("quiz");
-    const response = await api.quiz(courseId, { question_type: "multiple_choice", count: 5, language });
-    setQuiz(response.content);
+    const quiz = await api.quiz(courseId, { question_type: "multiple_choice", count: 5, language, difficulty, focus: focus || undefined });
+    setActiveQuiz(quiz);
+    setQuizAnswers({});
+    setAttempt(null);
+    await load();
+    setBusy("");
+  }
+
+  async function submitQuiz() {
+    if (!activeQuiz) return;
+    setBusy("attempt");
+    const result = await api.submitQuiz(activeQuiz.id, quizAnswers);
+    setAttempt(result);
     setBusy("");
   }
 
@@ -111,24 +157,25 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
 
   return (
     <Shell>
-      <section className="mb-6 grid gap-5 lg:grid-cols-[1fr_340px]">
-        <div className="tech-panel rounded p-6">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">课程详情</p>
-          <h1 className="text-5xl font-semibold leading-tight text-slate-950">{course?.name || "正在加载..."}</h1>
-          <p className="mt-3 max-w-3xl text-slate-600">{course?.description || "上传课件资料后即可构建这门课的知识库。"}</p>
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            <div className="rounded bg-white p-4">
-              <p className="text-sm text-slate-500">文档</p>
-              <p className="mt-1 text-2xl font-semibold">{documents.length}</p>
-            </div>
-            <div className="rounded bg-white p-4">
-              <p className="text-sm text-slate-500">知识片段</p>
-              <p className="mt-1 text-2xl font-semibold">{totalChunks}</p>
-            </div>
-            <div className="rounded bg-white p-4">
-              <p className="text-sm text-slate-500">可问答资料</p>
-              <p className="mt-1 text-2xl font-semibold">{readyDocuments.length}</p>
-            </div>
+      <section className="mb-6 grid gap-5 xl:grid-cols-[1fr_360px]">
+        <div className="tech-panel rounded p-7">
+          <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-semibold text-slate-600">
+            <Layers3 size={16} /> 课程学习工作台
+          </p>
+          <h1 className="text-4xl font-semibold leading-tight text-slate-950 md:text-6xl">{course?.name || "正在加载课程..."}</h1>
+          <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">{course?.description || "上传多份课件后，CampusMind 会把它们组织成可检索、可问答、可练习的课程知识库。"}</p>
+          <div className="mt-7 grid gap-3 sm:grid-cols-4">
+            {[
+              ["文档", documents.length],
+              ["可问答", readyDocuments.length],
+              ["知识片段", totalChunks],
+              ["平均得分", `${stats?.average_score || 0}%`]
+            ].map(([label, value]) => (
+              <div key={label} className="rounded bg-white p-4 shadow-sm">
+                <p className="text-sm text-slate-500">{label}</p>
+                <p className="mt-1 text-2xl font-semibold text-slate-950">{value}</p>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -144,15 +191,15 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
                 key={value}
                 onClick={() => setLanguage(value)}
                 className={`rounded border px-3 py-2 text-sm font-medium transition ${
-                  language === value ? "border-ink bg-ink text-white" : "border-slate-200 bg-white text-slate-600 hover:border-mint hover:text-mint"
+                  language === value ? "border-slate-950 bg-slate-950 text-white" : "border-slate-200 bg-white text-slate-600 hover:border-sky-400 hover:text-sky-600"
                 }`}
               >
                 {label}
               </button>
             ))}
           </div>
-          <div className="mt-5 rounded bg-teal-50 p-4 text-sm leading-6 text-teal-900">
-            当前聊天使用 Ajou / Mindlogic 在线模型，课件检索使用本地向量兜底。
+          <div className="mt-5 rounded bg-sky-50 p-4 text-sm leading-6 text-sky-950">
+            当前采用“课件检索 + 在线 AI”的 RAG 流程。系统会优先引用你上传的课程资料。
           </div>
         </div>
       </section>
@@ -169,39 +216,38 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
             onDrop={async (event) => {
               event.preventDefault();
               setDragging(false);
-              const file = event.dataTransfer.files?.[0];
-              if (file) await uploadFile(file);
+              await uploadFiles(Array.from(event.dataTransfer.files || []));
             }}
-            className={`tech-panel rounded p-5 transition ${dragging ? "scale-[1.01] border-cyan-400 bg-cyan-50/80" : ""}`}
+            className={`tech-panel rounded p-5 transition ${dragging ? "scale-[1.01] border-sky-300 bg-sky-50" : ""}`}
           >
             <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-              <FileUp size={19} /> 上传 PDF
+              <FileUp size={19} /> 多文档上传
             </h2>
-            <div className="mb-4 grid min-h-40 place-items-center rounded border border-dashed border-slate-300 bg-white/70 p-5 text-center">
-              <UploadCloud className="mb-3 text-mint" size={34} />
-              <p className="font-semibold">拖拽 PDF 到这里</p>
-              <p className="mt-1 text-sm text-slate-500">或点击下方按钮选择文件</p>
+            <div className="mb-4 grid min-h-40 place-items-center rounded border border-dashed border-slate-300 bg-white/80 p-5 text-center">
+              <UploadCloud className="mb-3 text-sky-500" size={34} />
+              <p className="font-semibold">拖拽多份 PDF 到这里</p>
+              <p className="mt-1 text-sm text-slate-500">一次最多 8 份，系统会统一加入课程知识库</p>
             </div>
-            <input name="file" type="file" accept="application/pdf" className="mb-4 block w-full rounded border border-slate-200 bg-white p-3 text-sm" />
-            <button disabled={busy === "upload"} className="inline-flex w-full items-center justify-center gap-2 rounded bg-mint px-4 py-3 font-semibold text-white transition hover:bg-ink disabled:opacity-60">
-              {busy === "upload" && <Loader2 className="animate-spin" size={17} />} 解析 PDF
+            <input name="files" type="file" multiple accept="application/pdf" className="mb-4 block w-full rounded border border-slate-200 bg-white p-3 text-sm" />
+            <button disabled={busy === "upload"} className="inline-flex w-full items-center justify-center gap-2 rounded bg-slate-950 px-4 py-3 font-semibold text-white transition hover:bg-sky-600 disabled:opacity-60">
+              {busy === "upload" && <Loader2 className="animate-spin" size={17} />} 解析并建立索引
             </button>
           </form>
 
           <section className="tech-panel rounded p-5">
             <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-              <NotebookTabs size={19} /> 课程文档
+              <FileSearch size={19} /> 课程文档
             </h2>
             <div className="space-y-3">
               {documents.map((doc) => (
                 <div key={doc.id} className="rounded border border-slate-200 bg-white p-3">
                   <div className="flex items-start justify-between gap-3">
-                    <p className="text-sm font-semibold">{doc.file_name}</p>
+                    <p className="text-sm font-semibold text-slate-950">{doc.file_name}</p>
                     <span className="rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-600">{statusLabel(doc.status)}</span>
                   </div>
-                  <p className="mt-2 text-xs text-slate-500">{doc.page_count} 页 · {doc.chunk_count} 个片段</p>
+                  <p className="mt-2 text-xs text-slate-500">{doc.page_count} 页 · {doc.chunk_count} 个知识片段</p>
                   {doc.status === "ready" && (
-                    <button onClick={() => runSummary(doc.id)} className="mt-3 inline-flex items-center gap-2 rounded border border-slate-200 px-3 py-2 text-sm font-medium hover:border-coral hover:text-coral">
+                    <button onClick={() => runSummary(doc.id)} className="mt-3 inline-flex items-center gap-2 rounded border border-slate-200 px-3 py-2 text-sm font-medium hover:border-sky-400 hover:text-sky-600">
                       <Sparkles size={15} /> 生成总结
                     </button>
                   )}
@@ -219,17 +265,17 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
               <h2 className="flex items-center gap-2 text-lg font-semibold">
                 <MessageSquare size={19} /> 基于课件提问
               </h2>
-              <span className="text-sm text-slate-500">{readyDocuments.length} 个文档已就绪</span>
+              <span className="text-sm text-slate-500">{readyDocuments.length} 份资料已就绪</span>
             </div>
             <div className="max-h-[440px] min-h-[280px] space-y-4 overflow-y-auto p-5">
-              {messages.length === 0 && <p className="text-slate-500">上传 PDF 后即可提问。回答会引用检索到的课件片段。</p>}
+              {messages.length === 0 && <p className="text-slate-500">上传 PDF 后即可提问。回答会引用检索到的课件片段，并给出复习建议。</p>}
               {messages.map((message, index) => (
-                <div key={index} className={message.role === "user" ? "ml-auto max-w-3xl rounded bg-ink p-4 text-white" : "max-w-3xl rounded border border-slate-200 bg-white p-4"}>
-                  <div className="prose-output text-sm">{message.content}</div>
+                <div key={index} className={message.role === "user" ? "ml-auto max-w-3xl rounded bg-slate-950 p-4 text-white" : "max-w-3xl rounded border border-slate-200 bg-white p-4"}>
+                  <div className="prose-output whitespace-pre-wrap text-sm">{message.content}</div>
                   {message.sources && message.sources.length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-2">
                       {message.sources.map((source) => (
-                        <span key={source.chunk_id} className="rounded-full bg-teal-50 px-2 py-1 text-xs text-teal-800">
+                        <span key={source.chunk_id} className="rounded-full bg-sky-50 px-2 py-1 text-xs text-sky-800">
                           {source.document_name} 第 {source.page} 页
                         </span>
                       ))}
@@ -239,13 +285,13 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
               ))}
               {busy === "chat" && (
                 <p className="flex items-center gap-2 text-sm text-slate-500">
-                  <Bot size={17} /> 正在思考...
+                  <Bot size={17} /> 正在检索课件并生成回答...
                 </p>
               )}
             </div>
             <form onSubmit={ask} className="flex gap-3 border-t border-slate-200 bg-white/70 p-4">
-              <input name="question" placeholder="例如：这章考试重点是什么？" className="focus-ring min-w-0 flex-1 rounded border border-slate-200 px-4 py-3" />
-              <button className="grid h-12 w-12 place-items-center rounded bg-coral text-white transition hover:bg-ink" title="发送">
+              <input name="question" placeholder="例如：这章考试重点是什么？请结合课件回答。" className="focus-ring min-w-0 flex-1 rounded border border-slate-200 px-4 py-3" />
+              <button className="grid h-12 w-12 place-items-center rounded bg-sky-500 text-white transition hover:bg-slate-950" title="发送">
                 <Send size={19} />
               </button>
             </form>
@@ -253,13 +299,56 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
 
           <div className="grid gap-6 lg:grid-cols-2">
             <section className="glass-panel rounded p-5">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="flex items-center gap-2 text-lg font-semibold">
-                  <ClipboardList size={19} /> 复习题
-                </h2>
-                <button onClick={runQuiz} disabled={busy === "quiz"} className="rounded bg-ink px-3 py-2 text-sm font-semibold text-white hover:bg-mint">生成</button>
-              </div>
-              <div className="prose-output max-h-96 overflow-y-auto text-sm text-slate-700">{quiz || "根据检索到的课程片段生成 5 道选择题。"}</div>
+              <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+                <ClipboardList size={19} /> Quiz 练习系统
+              </h2>
+              <form onSubmit={runQuiz} className="mb-4 grid gap-3 md:grid-cols-[1fr_130px_100px]">
+                <input value={focus} onChange={(event) => setFocus(event.target.value)} placeholder="关注范围，例如 ARP / SDN" className="focus-ring rounded border border-slate-200 px-3 py-2" />
+                <select value={difficulty} onChange={(event) => setDifficulty(event.target.value)} className="rounded border border-slate-200 px-3 py-2">
+                  <option value="easy">基础</option>
+                  <option value="medium">中等</option>
+                  <option value="hard">挑战</option>
+                </select>
+                <button disabled={busy === "quiz"} className="rounded bg-slate-950 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-600">出题</button>
+              </form>
+              {quizzes.length > 0 && (
+                <div className="mb-4 flex flex-wrap gap-2">
+                  {quizzes.slice(0, 4).map((item) => (
+                    <button key={item.id} onClick={() => { setActiveQuiz(item); setAttempt(null); setQuizAnswers({}); }} className={`rounded-full px-3 py-1 text-xs ${activeQuiz?.id === item.id ? "bg-sky-100 text-sky-700" : "bg-white text-slate-600"}`}>
+                      {item.title}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {parsedQuiz?.questions ? (
+                <div className="space-y-4">
+                  <p className="font-semibold text-slate-950">{parsedQuiz.title || activeQuiz?.title}</p>
+                  {parsedQuiz.questions.map((question, index) => (
+                    <div key={question.id || index} className="rounded border border-slate-200 bg-white p-4">
+                      <p className="font-medium">{index + 1}. {question.question}</p>
+                      <div className="mt-3 grid gap-2">
+                        {(question.options || []).map((option) => (
+                          <label key={option} className="flex cursor-pointer items-center gap-2 rounded border border-slate-100 px-3 py-2 text-sm hover:bg-sky-50">
+                            <input type="radio" name={question.id} value={option[0]} checked={quizAnswers[question.id] === option[0]} onChange={() => setQuizAnswers((current) => ({ ...current, [question.id]: option[0] }))} />
+                            {option}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  <button onClick={submitQuiz} disabled={busy === "attempt"} className="rounded bg-sky-500 px-4 py-2 font-semibold text-white hover:bg-slate-950">提交并判分</button>
+                  {attempt && (
+                    <div className="rounded bg-green-50 p-4 text-sm text-green-900">
+                      <p className="mb-2 flex items-center gap-2 font-semibold"><CheckCircle2 size={17} /> 得分：{attempt.score} / {attempt.total}</p>
+                      <p className="whitespace-pre-wrap">{attempt.feedback}</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="prose-output max-h-96 overflow-y-auto whitespace-pre-wrap text-sm text-slate-700">
+                  {activeQuiz?.content || "生成一套题后，这里会显示可作答的选择题。"}
+                </div>
+              )}
             </section>
 
             <section className="glass-panel rounded p-5">
@@ -267,19 +356,19 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
                 <Languages size={19} /> 术语解释
               </h2>
               <form onSubmit={runTerms} className="space-y-3">
-                <textarea name="text" rows={4} placeholder="粘贴术语或一段课件内容..." className="focus-ring w-full resize-none rounded border border-slate-200 px-3 py-3" />
-                <button disabled={busy === "terms"} className="rounded bg-mint px-4 py-2 font-semibold text-white hover:bg-ink">解释术语</button>
+                <textarea name="text" rows={4} placeholder="粘贴术语或一段课件内容，例如：ARP, routing table, OpenFlow..." className="focus-ring w-full resize-none rounded border border-slate-200 px-3 py-3" />
+                <button disabled={busy === "terms"} className="rounded bg-slate-950 px-4 py-2 font-semibold text-white hover:bg-sky-600">解释术语</button>
               </form>
-              <div className="prose-output mt-4 max-h-72 overflow-y-auto text-sm text-slate-700">{terms}</div>
+              <div className="prose-output mt-4 max-h-72 overflow-y-auto whitespace-pre-wrap text-sm text-slate-700">{terms}</div>
             </section>
           </div>
 
           {summary && (
             <section className="glass-panel rounded p-5">
               <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-                <FileSearch size={19} /> 课件总结
+                <Target size={19} /> 课件总结与复习清单
               </h2>
-              <div className="prose-output text-sm text-slate-700">{summary}</div>
+              <div className="prose-output whitespace-pre-wrap text-sm text-slate-700">{summary}</div>
             </section>
           )}
         </section>
