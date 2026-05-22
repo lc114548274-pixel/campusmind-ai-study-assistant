@@ -134,6 +134,12 @@ export const api = {
       body: JSON.stringify({ answers })
     }),
   studyStats: () => request<StudyStats>("/api/study/stats"),
+  agentTools: () => request<Array<{ id: string; name: string; description: string; requires_course: boolean }>>("/api/agent/tools"),
+  agentRun: (payload: { tool: string; text: string; language: string; course_id?: number }) =>
+    request<{ tool: string; content: string }>("/api/agent/run", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    }),
   terms: (payload: { text: string; source_language: string; target_language: string }) =>
     request<{ content: string }>("/api/terms/translate", { method: "POST", body: JSON.stringify(payload) })
 };
