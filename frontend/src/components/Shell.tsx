@@ -26,7 +26,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             </span>
             <div>
               <p className="text-lg font-semibold leading-tight">CampusMind</p>
-              <p className="text-xs text-slate-500">AI Study Workspace</p>
+              <p className="text-xs text-slate-500">AI 学习工作台</p>
             </div>
           </Link>
 
@@ -52,7 +52,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2">
             <span className="hidden items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-2 text-sm text-blue-700 lg:flex">
               <span className="h-2 w-2 rounded-full bg-blue-500" />
-              <Sparkles size={16} /> Online AI Ready
+              <Sparkles size={16} /> 在线 AI 已接入
             </span>
             <button
               className="grid h-10 w-10 place-items-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-violet-300 hover:text-violet-600"

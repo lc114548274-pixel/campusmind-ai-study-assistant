@@ -87,10 +87,13 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
   async function uploadFiles(files: File[]) {
     if (files.length === 0) return;
     setBusy("upload");
-    if (files.length === 1) await api.uploadDocument(courseId, files[0]);
-    else await api.uploadDocuments(courseId, files);
-    await load();
-    setBusy("");
+    try {
+      if (files.length === 1) await api.uploadDocument(courseId, files[0]);
+      else await api.uploadDocuments(courseId, files);
+      await load();
+    } finally {
+      setBusy("");
+    }
   }
 
   async function upload(event: FormEvent<HTMLFormElement>) {
@@ -109,36 +112,48 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
     setMessages((current) => [...current, { role: "user", content: question }]);
     formElement.reset();
     setBusy("chat");
-    const response = await api.chat(courseId, { question, language, session_id: sessionId });
-    setSessionId(response.session_id);
-    setMessages((current) => [...current, { role: "assistant", content: response.answer, sources: response.sources }]);
-    setBusy("");
+    try {
+      const response = await api.chat(courseId, { question, language, session_id: sessionId });
+      setSessionId(response.session_id);
+      setMessages((current) => [...current, { role: "assistant", content: response.answer, sources: response.sources }]);
+    } finally {
+      setBusy("");
+    }
   }
 
   async function runSummary(documentId: number) {
     setBusy(`summary-${documentId}`);
-    const response = await api.summarize(documentId, language, true);
-    setSummary(response.content);
-    setBusy("");
+    try {
+      const response = await api.summarize(documentId, language, true);
+      setSummary(response.content);
+    } finally {
+      setBusy("");
+    }
   }
 
   async function runQuiz(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy("quiz");
-    const quiz = await api.quiz(courseId, { question_type: "multiple_choice", count: 5, language, difficulty, focus: focus || undefined });
-    setActiveQuiz(quiz);
-    setQuizAnswers({});
-    setAttempt(null);
-    await load();
-    setBusy("");
+    try {
+      const quiz = await api.quiz(courseId, { question_type: "multiple_choice", count: 5, language, difficulty, focus: focus || undefined });
+      setActiveQuiz(quiz);
+      setQuizAnswers({});
+      setAttempt(null);
+      await load();
+    } finally {
+      setBusy("");
+    }
   }
 
   async function submitQuiz() {
     if (!activeQuiz) return;
     setBusy("attempt");
-    const result = await api.submitQuiz(activeQuiz.id, quizAnswers);
-    setAttempt(result);
-    setBusy("");
+    try {
+      const result = await api.submitQuiz(activeQuiz.id, quizAnswers);
+      setAttempt(result);
+    } finally {
+      setBusy("");
+    }
   }
 
   async function runTerms(event: FormEvent<HTMLFormElement>) {
@@ -146,9 +161,12 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
     const text = String(new FormData(event.currentTarget).get("text") || "");
     if (!text.trim()) return;
     setBusy("terms");
-    const response = await api.terms({ text, source_language: "auto", target_language: language });
-    setTerms(response.content);
-    setBusy("");
+    try {
+      const response = await api.terms({ text, source_language: "auto", target_language: language });
+      setTerms(response.content);
+    } finally {
+      setBusy("");
+    }
   }
 
   useEffect(() => {
@@ -226,7 +244,7 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
             <div className="mb-4 grid min-h-40 place-items-center rounded border border-dashed border-slate-300 bg-white/80 p-5 text-center">
               <UploadCloud className="mb-3 text-sky-500" size={34} />
               <p className="font-semibold">拖拽多份 PDF 到这里</p>
-              <p className="mt-1 text-sm text-slate-500">一次最多 8 份，系统会统一加入课程知识库</p>
+              <p className="mt-1 text-sm text-slate-500">系统会统一加入课程知识库。</p>
             </div>
             <input name="files" type="file" multiple accept="application/pdf" className="mb-4 block w-full rounded border border-slate-200 bg-white p-3 text-sm" />
             <button disabled={busy === "upload"} className="inline-flex w-full items-center justify-center gap-2 rounded bg-slate-950 px-4 py-3 font-semibold text-white transition hover:bg-sky-600 disabled:opacity-60">
@@ -274,10 +292,10 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
                   <div className="prose-output whitespace-pre-wrap text-sm">{message.content}</div>
                   {message.sources && message.sources.length > 0 && (
                     <div className="mt-4 space-y-2">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">来源引用</p>
+                      <p className="text-xs font-semibold tracking-wide text-blue-600">来源引用</p>
                       {message.sources.map((source) => (
                         <div key={source.chunk_id} className="rounded-2xl border border-blue-100 bg-blue-50 p-3">
-                          <p className="text-sm font-semibold text-slate-950">{source.document_name} · Page {source.page}</p>
+                          <p className="text-sm font-semibold text-slate-950">{source.document_name} · 第 {source.page} 页</p>
                           {source.text && <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">“{source.text}”</p>}
                         </div>
                       ))}
@@ -301,69 +319,69 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
         </section>
 
         <aside className="space-y-6 xl:sticky xl:top-24 xl:self-start">
-            <section className="glass-panel rounded p-5">
-              <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-                <ClipboardList size={19} /> Quiz 练习系统
-              </h2>
-              <form onSubmit={runQuiz} className="mb-4 grid gap-3 md:grid-cols-[1fr_130px_100px]">
-                <input value={focus} onChange={(event) => setFocus(event.target.value)} placeholder="关注范围，例如 ARP / SDN" className="focus-ring rounded border border-slate-200 px-3 py-2" />
-                <select value={difficulty} onChange={(event) => setDifficulty(event.target.value)} className="rounded border border-slate-200 px-3 py-2">
-                  <option value="easy">基础</option>
-                  <option value="medium">中等</option>
-                  <option value="hard">挑战</option>
-                </select>
-                <button disabled={busy === "quiz"} className="rounded bg-slate-950 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-600">出题</button>
-              </form>
-              {quizzes.length > 0 && (
-                <div className="mb-4 flex flex-wrap gap-2">
-                  {quizzes.slice(0, 4).map((item) => (
-                    <button key={item.id} onClick={() => { setActiveQuiz(item); setAttempt(null); setQuizAnswers({}); }} className={`rounded-full px-3 py-1 text-xs ${activeQuiz?.id === item.id ? "bg-sky-100 text-sky-700" : "bg-white text-slate-600"}`}>
-                      {item.title}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {parsedQuiz?.questions ? (
-                <div className="space-y-4">
-                  <p className="font-semibold text-slate-950">{parsedQuiz.title || activeQuiz?.title}</p>
-                  {parsedQuiz.questions.map((question, index) => (
-                    <div key={question.id || index} className="rounded border border-slate-200 bg-white p-4">
-                      <p className="font-medium">{index + 1}. {question.question}</p>
-                      <div className="mt-3 grid gap-2">
-                        {(question.options || []).map((option) => (
-                          <label key={option} className="flex cursor-pointer items-center gap-2 rounded border border-slate-100 px-3 py-2 text-sm hover:bg-sky-50">
-                            <input type="radio" name={question.id} value={option[0]} checked={quizAnswers[question.id] === option[0]} onChange={() => setQuizAnswers((current) => ({ ...current, [question.id]: option[0] }))} />
-                            {option}
-                          </label>
-                        ))}
-                      </div>
+          <section className="glass-panel rounded p-5">
+            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+              <ClipboardList size={19} /> 复习题练习系统
+            </h2>
+            <form onSubmit={runQuiz} className="mb-4 grid gap-3 md:grid-cols-[1fr_130px_100px]">
+              <input value={focus} onChange={(event) => setFocus(event.target.value)} placeholder="关注范围，例如 ARP / SDN" className="focus-ring rounded border border-slate-200 px-3 py-2" />
+              <select value={difficulty} onChange={(event) => setDifficulty(event.target.value)} className="rounded border border-slate-200 px-3 py-2">
+                <option value="easy">基础</option>
+                <option value="medium">中等</option>
+                <option value="hard">挑战</option>
+              </select>
+              <button disabled={busy === "quiz"} className="rounded bg-slate-950 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-600">出题</button>
+            </form>
+            {quizzes.length > 0 && (
+              <div className="mb-4 flex flex-wrap gap-2">
+                {quizzes.slice(0, 4).map((item) => (
+                  <button key={item.id} onClick={() => { setActiveQuiz(item); setAttempt(null); setQuizAnswers({}); }} className={`rounded-full px-3 py-1 text-xs ${activeQuiz?.id === item.id ? "bg-sky-100 text-sky-700" : "bg-white text-slate-600"}`}>
+                    {item.title}
+                  </button>
+                ))}
+              </div>
+            )}
+            {parsedQuiz?.questions ? (
+              <div className="space-y-4">
+                <p className="font-semibold text-slate-950">{parsedQuiz.title || activeQuiz?.title}</p>
+                {parsedQuiz.questions.map((question, index) => (
+                  <div key={question.id || index} className="rounded border border-slate-200 bg-white p-4">
+                    <p className="font-medium">{index + 1}. {question.question}</p>
+                    <div className="mt-3 grid gap-2">
+                      {(question.options || []).map((option) => (
+                        <label key={option} className="flex cursor-pointer items-center gap-2 rounded border border-slate-100 px-3 py-2 text-sm hover:bg-sky-50">
+                          <input type="radio" name={question.id} value={option[0]} checked={quizAnswers[question.id] === option[0]} onChange={() => setQuizAnswers((current) => ({ ...current, [question.id]: option[0] }))} />
+                          {option}
+                        </label>
+                      ))}
                     </div>
-                  ))}
-                  <button onClick={submitQuiz} disabled={busy === "attempt"} className="rounded bg-sky-500 px-4 py-2 font-semibold text-white hover:bg-slate-950">提交并判分</button>
-                  {attempt && (
-                    <div className="rounded bg-green-50 p-4 text-sm text-green-900">
-                      <p className="mb-2 flex items-center gap-2 font-semibold"><CheckCircle2 size={17} /> 得分：{attempt.score} / {attempt.total}</p>
-                      <p className="whitespace-pre-wrap">{attempt.feedback}</p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="prose-output max-h-96 overflow-y-auto whitespace-pre-wrap text-sm text-slate-700">
-                  {activeQuiz?.content || "生成一套题后，这里会显示可作答的选择题。"}
-                </div>
-              )}
-            </section>
+                  </div>
+                ))}
+                <button type="button" onClick={submitQuiz} disabled={busy === "attempt"} className="rounded bg-sky-500 px-4 py-2 font-semibold text-white hover:bg-slate-950">提交并判分</button>
+                {attempt && (
+                  <div className="rounded bg-green-50 p-4 text-sm text-green-900">
+                    <p className="mb-2 flex items-center gap-2 font-semibold"><CheckCircle2 size={17} /> 得分：{attempt.score} / {attempt.total}</p>
+                    <p className="whitespace-pre-wrap">{attempt.feedback}</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="prose-output max-h-96 overflow-y-auto whitespace-pre-wrap text-sm text-slate-700">
+                {activeQuiz?.content || "生成一套题后，这里会显示可作答的选择题。"}
+              </div>
+            )}
+          </section>
 
-            <section className="glass-panel rounded p-5">
-              <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-                <Languages size={19} /> 术语解释
-              </h2>
-              <form onSubmit={runTerms} className="space-y-3">
-                <textarea name="text" rows={4} placeholder="粘贴术语或一段课件内容，例如：ARP, routing table, OpenFlow..." className="focus-ring w-full resize-none rounded border border-slate-200 px-3 py-3" />
-                <button disabled={busy === "terms"} className="rounded bg-slate-950 px-4 py-2 font-semibold text-white hover:bg-sky-600">解释术语</button>
-              </form>
-              <div className="prose-output mt-4 max-h-72 overflow-y-auto whitespace-pre-wrap text-sm text-slate-700">{terms}</div>
-            </section>
+          <section className="glass-panel rounded p-5">
+            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+              <Languages size={19} /> 术语解释
+            </h2>
+            <form onSubmit={runTerms} className="space-y-3">
+              <textarea name="text" rows={4} placeholder="粘贴术语或一段课件内容，例如：ARP, routing table, OpenFlow..." className="focus-ring w-full resize-none rounded border border-slate-200 px-3 py-3" />
+              <button disabled={busy === "terms"} className="rounded bg-slate-950 px-4 py-2 font-semibold text-white hover:bg-sky-600">解释术语</button>
+            </form>
+            <div className="prose-output mt-4 max-h-72 overflow-y-auto whitespace-pre-wrap text-sm text-slate-700">{terms}</div>
+          </section>
 
           {summary && (
             <section className="glass-panel rounded p-5">

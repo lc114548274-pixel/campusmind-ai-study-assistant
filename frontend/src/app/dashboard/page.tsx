@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, BookOpen, CalendarClock, FileText, Plus, RefreshCw, Search, Sparkles, Trophy } from "lucide-react";
+import { ArrowRight, BookOpen, CalendarClock, FileText, Plus, RefreshCw, Search, Sparkles, Trash2, Trophy } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { api, Course } from "@/lib/api";
 
@@ -18,6 +18,7 @@ export default function DashboardPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const filteredCourses = useMemo(
     () => courses.filter((course) => `${course.name} ${course.description || ""}`.toLowerCase().includes(query.toLowerCase())),
@@ -47,6 +48,20 @@ export default function DashboardPage() {
     await load();
   }
 
+  async function deleteCourse(course: Course) {
+    const confirmed = window.confirm(`确定要删除“${course.name}”吗？课程资料、问答记录和题库都会一起删除。`);
+    if (!confirmed) return;
+    setDeletingId(course.id);
+    try {
+      await api.deleteCourse(course.id);
+      setCourses((current) => current.filter((item) => item.id !== course.id));
+    } catch (exc) {
+      setError(exc instanceof Error ? exc.message : "课程删除失败，请稍后重试。");
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   useEffect(() => {
     load();
   }, []);
@@ -59,7 +74,7 @@ export default function DashboardPage() {
             <Sparkles size={15} /> 学习工作台
           </p>
           <h1 className="max-w-3xl text-5xl font-semibold leading-tight tracking-tight text-slate-950 md:text-6xl">选择一门课程，继续你的 AI 学习流程。</h1>
-          <p className="mt-4 max-w-2xl leading-8 text-slate-600">课程库展示每门课的资料数量、Quiz 数量、最近学习时间和知识库进度。进入课程后即可上传资料、问答、总结和练习。</p>
+          <p className="mt-4 max-w-2xl leading-8 text-slate-600">课程库展示每门课的资料数量、复习题数量、最近学习时间和知识库进度。进入课程后即可上传资料、问答、总结和练习。</p>
           <div className="mt-6 flex max-w-xl items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-3 shadow-soft">
             <Search size={18} className="text-slate-400" />
             <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索课程、关键词或说明" className="min-w-0 flex-1 bg-transparent outline-none" />
@@ -111,9 +126,20 @@ export default function DashboardPage() {
                 <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-blue-500 to-violet-500 text-white shadow-soft">
                   <BookOpen size={22} />
                 </span>
-                <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-600">
-                  {progress}% complete
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm text-slate-600">
+                    {progress}% 完成
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => deleteCourse(course)}
+                    disabled={deletingId === course.id}
+                    className="grid h-9 w-9 place-items-center rounded-full border border-red-100 bg-red-50 text-red-600 transition hover:bg-red-100 disabled:opacity-60"
+                    title="删除课程"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
               <h3 className="text-2xl font-semibold tracking-tight text-slate-950">{course.name}</h3>
               <p className="mt-2 line-clamp-3 min-h-14 text-sm leading-6 text-slate-600">{course.description || "暂无课程说明。进入课程详情页上传 PDF 后即可构建知识库。"}</p>
@@ -125,7 +151,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="rounded-2xl bg-slate-50 p-3">
                   <Trophy size={16} className="text-violet-600" />
-                  <p className="mt-2 text-xs text-slate-500">Quiz</p>
+                  <p className="mt-2 text-xs text-slate-500">复习题</p>
                   <p className="font-semibold">{course.quiz_count || 0}</p>
                 </div>
                 <div className="rounded-2xl bg-slate-50 p-3">

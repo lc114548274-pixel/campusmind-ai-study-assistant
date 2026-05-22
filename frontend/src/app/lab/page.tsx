@@ -6,16 +6,16 @@ import { Shell } from "@/components/Shell";
 import { api } from "@/lib/api";
 
 const modes = [
-  { id: "ask", label: "Ask AI", icon: FileQuestion, hint: "将问题交给课程 RAG 问答工具，支持来源引用。" },
-  { id: "summary", label: "Summary", icon: ClipboardList, hint: "整理重点、复习清单和可能考点。" },
-  { id: "quiz", label: "Quiz", icon: BookOpenCheck, hint: "生成选择题、答案和解析。" },
-  { id: "glossary", label: "Glossary", icon: Languages, hint: "生成中英韩术语解释表。" }
+  { id: "ask", label: "智能问答", icon: FileQuestion, hint: "将问题交给课程 RAG 问答工具，支持来源引用。" },
+  { id: "summary", label: "重点总结", icon: ClipboardList, hint: "整理重点、复习清单和可能考点。" },
+  { id: "quiz", label: "生成复习题", icon: BookOpenCheck, hint: "生成选择题、答案和解析。" },
+  { id: "glossary", label: "术语解释", icon: Languages, hint: "生成中英韩术语解释表。" }
 ];
 
 export default function LabPage() {
   const [mode, setMode] = useState("glossary");
   const [language, setLanguage] = useState("zh");
-  const [text, setText] = useState("Routing Table, Packet Switching, Link Layer, ARP");
+  const [text, setText] = useState("路由表、分组交换、链路层、ARP 地址解析协议");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
   const [toolCount, setToolCount] = useState(4);
@@ -44,11 +44,11 @@ export default function LabPage() {
     <Shell>
       <section className="mb-7 tech-panel p-8">
         <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700">
-          <BrainCircuit size={15} /> Agent 工具台 · {toolCount} tools
+          <BrainCircuit size={15} /> Agent 工具台 · {toolCount} 个工具
         </p>
-        <h1 className="text-5xl font-semibold tracking-tight text-slate-950">四种学习工具，由后端 Agent API 统一调度。</h1>
+        <h1 className="text-5xl font-semibold tracking-tight text-slate-950">四种学习工具，由后端工具接口统一调度。</h1>
         <p className="mt-3 max-w-2xl leading-8 text-slate-600">
-          借鉴 CSU-CampusMind 的工具调用思路，把 Ask AI、Summary、Quiz、Glossary 抽象成统一工具层。课程详情页负责真实资料学习，这里负责快速实验和能力展示。
+          借鉴 CSU-CampusMind 的工具调用思路，把智能问答、重点总结、复习题和术语解释抽象成统一工具层。课程详情页负责真实资料学习，这里负责快速实验和能力展示。
         </p>
       </section>
 
@@ -126,7 +126,7 @@ export default function LabPage() {
             placeholder="输入术语、课件段落、问题或需要解释的概念..."
           />
           <button disabled={loading || !text.trim()} className="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-950 px-5 py-3 font-semibold text-white hover:bg-blue-600 disabled:opacity-60">
-            <Sparkles size={18} /> {loading ? "生成中..." : "运行 Agent 工具"}
+            <Sparkles size={18} /> {loading ? "生成中..." : "运行学习工具"}
           </button>
           <div className="prose-output mt-6 min-h-56 whitespace-pre-wrap rounded-3xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-700">
             {result || "生成结果会显示在这里。"}

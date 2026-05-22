@@ -101,6 +101,7 @@ export const api = {
   createCourse: (payload: { name: string; description?: string }) =>
     request<Course>("/api/courses", { method: "POST", body: JSON.stringify(payload) }),
   course: (id: string) => request<Course>(`/api/courses/${id}`),
+  deleteCourse: (id: number) => request<{ status: string }>(`/api/courses/${id}`, { method: "DELETE" }),
   documents: (courseId: string) => request<DocumentItem[]>(`/api/courses/${courseId}/documents`),
   uploadDocument: (courseId: string, file: File) => {
     const form = new FormData();
