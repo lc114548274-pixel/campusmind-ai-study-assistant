@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Stop"
+﻿$ErrorActionPreference = "Stop"
 
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Backend = Join-Path $Root "backend"
@@ -12,7 +12,8 @@ Write-Host ""
 Write-Host "CampusMind 本地一键启动" -ForegroundColor Cyan
 Write-Host "项目目录: $Root"
 
-if (-not (Test-Path $EnvFile)) {
+if (-not (Test-Path $EnvFile)) 
+{
   Copy-Item $EnvExample $EnvFile
   Write-Host "已创建 .env。需要真实在线 AI 时，请在 .env 中填写 OPENAI_API_KEY。" -ForegroundColor Yellow
 }
